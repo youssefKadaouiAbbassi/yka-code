@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Installers for the 13 **category components** of the Ultimate Claude Code System v12. Each module is a self-contained `ComponentCategory` that exports (a) a category metadata object and (b) an `install(env, dryRun)` function. The `index.ts` barrel exposes two tier buckets — `RECOMMENDED_CATEGORIES` (8) and `OPTIONAL_CATEGORIES` (5) — plus the dynamic `installCategory()` dispatcher used by `src/commands/`.
+Installers for the 11 **category components** of the Ultimate Claude Code System v12. Each module is a self-contained `ComponentCategory` that exports (a) a category metadata object and (b) an `install(env, dryRun)` function. The `index.ts` barrel exposes two tier buckets — `RECOMMENDED_CATEGORIES` (8) and `OPTIONAL_CATEGORIES` (3) — plus the dynamic `installCategory()` dispatcher used by `src/commands/`.
 
 Every category installer is expected to be **idempotent**, register MCP servers via `registerMcp()` (which verifies the registration landed), and respect `dryRun`.
 
@@ -21,11 +21,9 @@ Every category installer is expected to be **idempotent**, register MCP servers 
 | `security.ts` | recommended | Snyk MCP (5), container-use (15) | `npm i -g snyk@latest` + `snyk mcp configure --tool=claude-cli`; brew/curl install Dagger's `container-use` |
 | `github.ts` | recommended | gh (16), github-mcp (17), claude-code-action (18), claude-code-review (19) | brew/apt/pacman/dnf `gh`; registers `github` HTTP MCP (needs `GITHUB_PAT`); others are guidance-only (GH Actions / native CC feature gated on `claude >= 2.1.104`) |
 | `workstation.ts` | recommended | Ghostty (36), tmux (37), chezmoi (39), age (41) | brew/pacman/curl Ghostty; **verifies tmux only** (installed by primordial); brew/curl chezmoi; brew/binary-download `age` |
-| `observability.ts` | optional | Native Telemetry (23), ccflare (24) | Verifies `OTEL_EXPORTER_OTLP_ENDPOINT` / `CLAUDE_CODE_ENABLE_TELEMETRY` env vars (primordial sets them); clones snipeship/ccflare + `bun build` + systemd user unit |
+| `observability.ts` | optional | Native Telemetry (23), ccflare (24) | Verifies `OTEL_EXPORTER_OTLP_ENDPOINT` / `CLAUDE_CODE_ENABLE_TELEMETRY` env vars (primordial sets them); clones snipeship/ccflare + `bun build` + writes launcher. No systemd auto-start — user runs `ccflare --serve` when they want it. |
 | `orchestration.ts` | optional | Agent Teams (25), Multica (26) | Verifies `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var (primordial); runs multica upstream install.sh `--with-server` (CLI + docker-compose stack) |
-| `design.ts` | optional | Google Stitch (30), awesome-design-md (31) | Registers `stitch` stdio MCP (needs `STITCH_API_KEY`); `npx degit VoltAgent/awesome-design-md` |
-| `knowledge.ts` | optional | Obsidian (32), claude-obsidian (33) | brew cask Obsidian on macOS, GitHub-releases AppImage on Linux; `npm i -g claude-obsidian` |
-| `workflow.ts` | optional | n8n (28), Composio (35) | `npm i -g n8n`; auto-bootstraps Composio MCP server via HTTP POST to backend.composio.dev (needs `COMPOSIO_API_KEY`), then registers HTTP MCP |
+| `workflow.ts` | optional | Composio (35) | Auto-bootstraps Composio MCP server via HTTP POST to backend.composio.dev (needs `COMPOSIO_API_KEY`), then registers HTTP MCP |
 
 ## Module Contract
 

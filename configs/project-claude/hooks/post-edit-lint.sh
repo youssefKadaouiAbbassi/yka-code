@@ -38,13 +38,26 @@ advisory_lint() {
   fi
 }
 
+use_biome=0
+if [[ -f "$project_root/biome.json" ]] || [[ -f "$project_root/biome.jsonc" ]]; then
+  use_biome=1
+fi
+
 case "$ext" in
   ts|tsx)
     advisory_lint npx tsc --noEmit --skipLibCheck 2>/dev/null || true
-    advisory_lint npx eslint "$file_path" 2>/dev/null || true
+    if [[ $use_biome -eq 1 ]]; then
+      advisory_lint biome check --no-errors-on-unmatched "$file_path"
+    else
+      advisory_lint npx eslint "$file_path" 2>/dev/null || true
+    fi
     ;;
   js|jsx|mjs|cjs)
-    advisory_lint npx eslint "$file_path" 2>/dev/null || true
+    if [[ $use_biome -eq 1 ]]; then
+      advisory_lint biome check --no-errors-on-unmatched "$file_path"
+    else
+      advisory_lint npx eslint "$file_path" 2>/dev/null || true
+    fi
     ;;
   py)
     advisory_lint ruff check "$file_path"

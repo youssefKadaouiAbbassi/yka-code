@@ -48,7 +48,11 @@ run_lint() {
 
 case "$ext" in
   ts|tsx|js|jsx|mjs|cjs)
-    run_lint npx eslint "$file_path" 2>/dev/null || true
+    if [[ -f "$project_root/biome.json" ]] || [[ -f "$project_root/biome.jsonc" ]]; then
+      run_lint biome check --no-errors-on-unmatched "$file_path"
+    else
+      run_lint npx eslint "$file_path" 2>/dev/null || true
+    fi
     ;;
   py)
     run_lint ruff check "$file_path"

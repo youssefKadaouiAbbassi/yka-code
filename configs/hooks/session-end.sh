@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Notification hook: logs session metadata on session end.
-# Writes to ~/.claude/session-logs/{date}.log
-
-# Fail-open: notification hook, exit cleanly if jq is missing.
 if ! command -v jq >/dev/null 2>&1; then
   exit 0
 fi
@@ -19,11 +15,9 @@ time_str="$(date '+%H:%M:%S')"
 timestamp="$(date '+%Y-%m-%dT%H:%M:%S%z')"
 log_file="${log_dir}/${date_str}.log"
 
-# Extract session metadata from hook input if available
 session_id="$(printf '%s' "$input" | jq -r '.session_id // "unknown"')"
 stop_hook_active="$(printf '%s' "$input" | jq -r '.stop_hook_active // false')"
 
-# Gather context
 git_branch="unknown"
 git_repo="unknown"
 if git rev-parse --is-inside-work-tree &>/dev/null 2>&1; then
@@ -31,9 +25,6 @@ if git rev-parse --is-inside-work-tree &>/dev/null 2>&1; then
   git_repo="$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || printf 'unknown')"
 fi
 
-# Write log entry. Use `printf '%s\n' '---'` rather than `printf '---\n'` because
-# some printf implementations (busybox, dash) parse a leading `--` in the format
-# string as an attempt at option termination and error out.
 {
   printf '%s\n' '---'
   printf 'timestamp: %s\n' "$timestamp"
@@ -44,7 +35,12 @@ fi
   printf '%s\n' '---'
 } >> "$log_file"
 
-printf 'Session logged to %s\n' "$log_file" >&2
+ccflare_port="${CCFLARE_PORT:-8787}"
+if curl -sf --max-time 1 "http://localhost:${ccflare_port}/health" >/dev/null 2>&1; then
+  printf 'Session logged to %s. Cost for this session: see http://localhost:%s/dashboard\n' "$log_file" "$ccflare_port" >&2
+else
+  printf 'Session logged to %s\n' "$log_file" >&2
+fi
 
 find "$log_dir" -type f -name '*.log' -mtime +30 -delete 2>/dev/null || true
 

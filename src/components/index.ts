@@ -10,8 +10,6 @@ import { workstationCategory } from "./workstation.js";
 import { ccPluginsCategory } from "./cc-plugins.js";
 import { observabilityCategory } from "./observability.js";
 import { orchestrationCategory } from "./orchestration.js";
-import { designCategory } from "./design.js";
-import { knowledgeCategory } from "./knowledge.js";
 import { workflowCategory } from "./workflow.js";
 import { skillsRegistryCategory } from "./skills-registry.js";
 
@@ -31,8 +29,6 @@ export const RECOMMENDED_CATEGORIES: ComponentCategory[] = [
 export const OPTIONAL_CATEGORIES: ComponentCategory[] = [
   observabilityCategory,
   orchestrationCategory,
-  designCategory,
-  knowledgeCategory,
   workflowCategory,
 ];
 
@@ -102,14 +98,6 @@ export async function installCategory(
     }
     case "orchestration": {
       const { install } = await import("./orchestration.js");
-      return install(env, dryRun);
-    }
-    case "design": {
-      const { install } = await import("./design.js");
-      return install(env, dryRun);
-    }
-    case "knowledge": {
-      const { install } = await import("./knowledge.js");
       return install(env, dryRun);
     }
     case "workflow": {

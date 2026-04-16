@@ -46,7 +46,6 @@ const MCP_ENV_VARS: { key: string; description: string }[] = [
   { key: "DOCFORK_API_KEY", description: "Docfork documentation MCP server" },
   { key: "GITHUB_PAT", description: "GitHub MCP server" },
   { key: "COMPOSIO_API_KEY", description: "Composio workflow MCP (ak_... from app.composio.dev)" },
-  { key: "STITCH_API_KEY", description: "Google Stitch MCP (npx @_davideast/stitch-mcp init)" },
 ];
 
 function formatEnvLine(env: DetectedEnvironment): string {
@@ -321,12 +320,6 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
         action: "Add `uses: anthropics/claude-code-action@v1` to a workflow in .github/workflows/ of any repo you want reviewed",
       });
     }
-    if (r.component === "Google Stitch" && r.status === "installed") {
-      manualSteps.push({
-        name: "Google Stitch",
-        action: "In any project, run `npx @_davideast/stitch-mcp init` to authenticate with Google (one-time gcloud/OAuth)",
-      });
-    }
     if (r.component === "Multica" && r.status === "installed") {
       manualSteps.push({
         name: "Multica",
@@ -349,7 +342,6 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
     if (key === "DOCFORK_API_KEY") return installedCategoryIds.has("browser-web");
     if (key === "GITHUB_PAT") return installedCategoryIds.has("github");
     if (key === "COMPOSIO_API_KEY") return installedCategoryIds.has("workflow");
-    if (key === "STITCH_API_KEY") return installedCategoryIds.has("design");
     return false;
   });
 

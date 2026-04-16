@@ -2,31 +2,15 @@ import { $ } from "bun";
 import { promises as fs } from "node:fs";
 import { dirname } from "node:path";
 import type { ComponentCategory, DetectedEnvironment, InstallResult } from "../types.js";
-import { commandExists, registerMcp, log } from "../utils.js";
+import { registerMcp, log } from "../utils.js";
 
 export const workflowCategory: ComponentCategory = {
   id: "workflow",
   name: "Workflow",
   tier: "optional",
-  description: "Workflow automation and integration platforms",
+  description: "Integration platform MCP (Composio \u2014 500+ SaaS via one MCP)",
   defaultEnabled: false,
   components: [
-    {
-      id: 28,
-      name: "n8n",
-      displayName: "n8n",
-      description: "Open-source workflow automation tool",
-      tier: "optional",
-      category: "workflow",
-      packages: [
-        {
-          name: "n8n",
-          displayName: "n8n",
-          npm: "npm install -g n8n",
-        },
-      ],
-      verifyCommand: "n8n --version",
-    },
     {
       id: 35,
       name: "composio",
@@ -48,43 +32,6 @@ export const workflowCategory: ComponentCategory = {
 
 export async function install(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult[]> {
   const results: InstallResult[] = [];
-
-  // --- n8n ---
-  try {
-    if (commandExists("n8n")) {
-      log.info("n8n already installed, skipping");
-      results.push({
-        component: "n8n",
-        status: "already-installed",
-        message: "n8n is already installed",
-        verifyPassed: true,
-      });
-    } else if (dryRun) {
-      log.info("[dry-run] Would run: npm install -g n8n");
-      results.push({
-        component: "n8n",
-        status: "skipped",
-        message: "[dry-run] Would install n8n",
-        verifyPassed: false,
-      });
-    } else {
-      await $`sh -c "npm install -g n8n"`;
-      const installed = commandExists("n8n");
-      results.push({
-        component: "n8n",
-        status: installed ? "installed" : "failed",
-        message: installed ? "n8n installed successfully" : "n8n install ran but binary not found",
-        verifyPassed: installed,
-      });
-    }
-  } catch (err) {
-    results.push({
-      component: "n8n",
-      status: "failed",
-      message: `n8n install failed: ${err instanceof Error ? err.message : String(err)}`,
-      verifyPassed: false,
-    });
-  }
 
   try {
     const key = process.env.COMPOSIO_API_KEY ?? "";

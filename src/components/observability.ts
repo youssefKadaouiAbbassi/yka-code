@@ -110,33 +110,11 @@ cd "$HOME/.ccflare" && exec "${bunPath}" run apps/tui/src/main.ts --port "\${CCF
       await fs.writeFile(launcher, script);
       await $`chmod +x ${launcher}`.nothrow();
 
-      if (env.os === "linux" && commandExists("systemctl")) {
-        const unitDir = join(env.homeDir, ".config", "systemd", "user");
-        await fs.mkdir(unitDir, { recursive: true });
-        const unit = `[Unit]
-Description=ccflare Claude API proxy + monitoring dashboard
-After=network.target
-
-[Service]
-Type=simple
-Environment=CCFLARE_PORT=8787
-ExecStart=%h/.local/bin/ccflare --serve
-Restart=on-failure
-RestartSec=3
-
-[Install]
-WantedBy=default.target
-`;
-        await fs.writeFile(join(unitDir, "ccflare.service"), unit);
-        await $`systemctl --user daemon-reload`.nothrow();
-        await $`systemctl --user enable --now ccflare.service`.nothrow();
-      }
-
       results.push({
         component: "ccflare",
         status: installed() ? "installed" : "failed",
         message: installed()
-          ? `ccflare installed at ${repoDir}, launcher → ${launcher}; systemd user unit starts it on port 8787 at login`
+          ? `ccflare installed at ${repoDir}, launcher → ${launcher}. Run \`ccflare --serve\` manually, or wire a systemd user unit if you want auto-start.`
           : "ccflare git/build finished but launcher not on PATH — ensure ~/.local/bin is in PATH",
         verifyPassed: installed(),
       });

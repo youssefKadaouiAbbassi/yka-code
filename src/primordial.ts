@@ -211,16 +211,18 @@ async function deployHooks(env: DetectedEnvironment, dryRun: boolean): Promise<I
 
     const hooksConfig: Record<string, Array<{ matcher?: string; hooks: Array<{ type: string; command: string }> }>> = {};
 
-    if (hookFilenames.has("pre-secrets-guard.sh") || hookFilenames.has("pre-destructive-blocker.sh")) {
-      hooksConfig.PreToolUse = [];
-      if (hookFilenames.has("pre-secrets-guard.sh")) {
-        // Secret-scan every tool input (matcher omitted = all tools)
-        hooksConfig.PreToolUse.push({ hooks: [cmd("pre-secrets-guard.sh")] });
-      }
-      if (hookFilenames.has("pre-destructive-blocker.sh")) {
-        // Destructive-command screen runs only on Bash
-        hooksConfig.PreToolUse.push({ matcher: "Bash", hooks: [cmd("pre-destructive-blocker.sh")] });
-      }
+    const preHooks: Array<{ matcher?: string; hooks: Array<{ type: string; command: string }> }> = [];
+    if (hookFilenames.has("pre-secrets-guard.sh")) {
+      preHooks.push({ hooks: [cmd("pre-secrets-guard.sh")] });
+    }
+    if (hookFilenames.has("pre-destructive-blocker.sh")) {
+      preHooks.push({ matcher: "Bash", hooks: [cmd("pre-destructive-blocker.sh")] });
+    }
+    if (hookFilenames.has("pre-pr-gate.sh")) {
+      preHooks.push({ matcher: "Bash", hooks: [cmd("pre-pr-gate.sh")] });
+    }
+    if (preHooks.length > 0) {
+      hooksConfig.PreToolUse = preHooks;
     }
 
     const postHooks: Array<{ matcher?: string; hooks: Array<{ type: string; command: string }> }> = [];

@@ -53,9 +53,10 @@ Shell scripts wired into user-scope `settings.json` by `installPrimordial` under
 |------|-------|------|-----------|
 | `pre-destructive-blocker.sh` | PreToolUse(Bash) | Blocks regex patterns settings deny can't express — `DROP/TRUNCATE TABLE`, unbounded `DELETE FROM`, `chmod -R 777`, `chown -R`, `mkfs`, `dd if=`, writes to `/dev/sd*`/`/dev/hd*`/`/dev/nvme*`, `git clean -f`-variants, `git checkout -- .`, `eval()`, base64-pipe-sh, fork bombs | **Yes** |
 | `pre-secrets-guard.sh` | PreToolUse(any) | Blocks tool input containing AWS/GitHub/Stripe/Anthropic/OpenAI (legacy + `sk-proj-` + `sk-svcacct-`)/OpenRouter/Groq/xAI/Google/Slack/npm keys, PEM/OpenSSH/EC keys, JWTs, Bash-level `.env` access, DB URLs with embedded passwords. Read-tool `.env` access is blocked by settings.json deny | **Yes** |
-| `post-lint-gate.sh` | PostToolUse(Write\|Edit\|MultiEdit) | Auto-runs eslint/ruff/clippy/go-vet/shellcheck on the edited file. Scoped to files under the current git root; prints advisory to stderr | No (advisory) |
-| `session-start.sh` | SessionStart | Prints banner with date, repo, branch, `tasks/lessons.md` head, and clickable local-tool URLs (multica, claude-mem, ccflare). Emits via `{"systemMessage": …}` so CC renders a visible panel | No |
-| `session-end.sh` | SessionEnd | Appends session metadata to `~/.claude/session-logs/{date}.log`. Purges logs older than 30 days | No |
+| `pre-pr-gate.sh` | PreToolUse(Bash) | Matches `gh pr create` and `git push`. Blocks push-to-default-branch; advises on >500-line diffs and no-recent-test-runs | **Yes** (on default-branch push) |
+| `post-lint-gate.sh` | PostToolUse(Write\|Edit\|MultiEdit) | Auto-runs biome (if `biome.json` present) or eslint, plus ruff/clippy/go-vet/shellcheck per extension. Scoped to files under the current git root; prints advisory to stderr | No (advisory) |
+| `session-start.sh` | SessionStart | Banner with date, repo, branch, today's session count, `tasks/lessons.md` head, clickable local-tool URLs (multica, claude-mem, ccflare). Silently runs `npx autoskills -y` in the background when a git project has no `.claude/skills/` dir. Emits via `{"systemMessage": …}` so CC renders a visible panel | No |
+| `session-end.sh` | SessionEnd | Appends session metadata to `~/.claude/session-logs/{date}.log`. Purges logs older than 30 days. If ccflare is reachable at its port, points the user to the dashboard for session cost | No |
 | `stop-summary.sh` | Stop | Scans files modified in the last 5 minutes for `console.log`, `debugger`, `TODO`/`FIXME`, `pdb.set_trace`, `binding.pry`, `print()` | No (advisory) |
 
 ### `project-claude/hooks/` (project-scope, deployed under `--local`)
