@@ -1,6 +1,6 @@
 import { describe, test, expect } from "bun:test";
 
-const PROJECT_DIR = "/home/izno/code/perso/github.com/youssefKadaouiAbbassi/code-tools";
+const PROJECT_DIR = "/home/izno/code/perso/github.com/youssefKadaouiAbbassi/yka-code";
 
 function runCli(...args: string[]) {
   const result = Bun.spawnSync(["bun", "run", "bin/setup.ts", ...args], {

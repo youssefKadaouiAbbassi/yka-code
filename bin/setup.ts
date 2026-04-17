@@ -3,7 +3,7 @@ import { defineCommand, runMain, runCommand } from "citty";
 
 const main = defineCommand({
   meta: {
-    name: "code-tools-setup",
+    name: "yka-code-setup",
     version: "0.1.0",
     description:
       "Interactive CLI installer for the Ultimate Claude Code System v12",

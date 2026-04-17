@@ -367,7 +367,7 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
     if (alreadyKnown.length > 0) {
       clack.note(
         [
-          "Already configured (from environment or ~/.config/code-tools/secrets.env):",
+          "Already configured (from environment or ~/.config/yka-code/secrets.env):",
           ...alreadyKnown.map(({ key, description }) => `  ${pc.green("✓")} ${pc.bold(key)}  ${pc.dim(`(${description})`)}`),
         ].join("\n"),
         "API keys on file",
@@ -379,7 +379,7 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
         "To activate these MCP servers, provide these API keys:",
         ...missing.map(({ key, description }) => `  ${pc.cyan("-")} ${pc.bold(key)}  ${pc.dim(`(${description})`)}`),
         "",
-        pc.dim("Saved to ~/.config/code-tools/secrets.env (chmod 600) and sourced from your shell rc."),
+        pc.dim("Saved to ~/.config/yka-code/secrets.env (chmod 600) and sourced from your shell rc."),
       ];
       clack.note(keyLines.join("\n"), "Required API keys");
 
@@ -482,7 +482,7 @@ async function recordJournal(env: DetectedEnvironment, tier: string | undefined)
 
   const readDirManifest = async (dir: string): Promise<string[]> => {
     try {
-      const m = JSON.parse(await Bun.file(join(env.claudeDir, dir, ".code-tools-managed.json")).text()) as { entries?: string[] };
+      const m = JSON.parse(await Bun.file(join(env.claudeDir, dir, ".yka-code-managed.json")).text()) as { entries?: string[] };
       return m.entries ?? [];
     } catch { return []; }
   };

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Shell function for tmux status bar: git branch + node/bun version
 # Source this file or add to ~/.bashrc / ~/.zshrc:
-#   source ~/.config/code-tools/statusline.sh
+#   source ~/.config/yka-code/statusline.sh
 #
 # Then reference in tmux.conf:
-#   set -g status-right "#(bash -c 'source ~/.config/code-tools/statusline.sh && code_tools_statusline')"
+#   set -g status-right "#(bash -c 'source ~/.config/yka-code/statusline.sh && yka_code_statusline')"
 
-code_tools_statusline() {
+yka_code_statusline() {
   local parts=()
 
   # Git branch
@@ -43,4 +43,4 @@ code_tools_statusline() {
   printf '%s' "${parts[*]}"
 }
 
-export -f code_tools_statusline
+export -f yka_code_statusline

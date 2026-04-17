@@ -1,6 +1,6 @@
 ---
 name: fix-bug
-description: [code-tools] Systematic bug-fix workflow. Use when the user reports a bug, error, crash, failing test, unexpected behavior, or says something is "broken". Leverages claude-mem (past solutions), Explore agent (codebase), silent-failure-hunter (for fallback-hiding bugs), and existing tests. Not for new features or refactors.
+description: [yka-code] Systematic bug-fix workflow. Use when the user reports a bug, error, crash, failing test, unexpected behavior, or says something is "broken". Leverages claude-mem (past solutions), Explore agent (codebase), silent-failure-hunter (for fallback-hiding bugs), and existing tests. Not for new features or refactors.
 ---
 
 # Fix Bug Workflow

@@ -2,7 +2,7 @@
 # Proper layer caching, minimal rebuilds, clean separation
 
 # Stage 1: Use existing working base image
-FROM code-tools-base AS claude-base
+FROM yka-code-base AS claude-base
 
 # Ensure proper permissions (tester user already exists in base image)
 RUN mkdir -p /home/tester/.claude && \

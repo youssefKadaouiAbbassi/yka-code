@@ -14,7 +14,7 @@ These tests are the authoritative post-install contract. They run in GitHub Acti
 
 | File | Description |
 |------|-------------|
-| `verify.bats` | 10 Bats assertions validating the primordial install: `jq` present, `~/.claude/settings.json` exists with >= 40 deny rules, `~/.claude/CLAUDE.md` present, 6 hook scripts executable (`pre-destructive-blocker`, `pre-secrets-guard`, `post-lint-gate`, `session-start`, `session-end`, `stop-summary`), `~/.tmux.conf` deployed, `~/.config/starship.toml` deployed, shell rc contains `# code-tools-managed` marker, `~/.claude-backup/` exists, backup has `manifest.json` |
+| `verify.bats` | 10 Bats assertions validating the primordial install: `jq` present, `~/.claude/settings.json` exists with >= 40 deny rules, `~/.claude/CLAUDE.md` present, 6 hook scripts executable (`pre-destructive-blocker`, `pre-secrets-guard`, `post-lint-gate`, `session-start`, `session-end`, `stop-summary`), `~/.tmux.conf` deployed, `~/.config/starship.toml` deployed, shell rc contains `# yka-code-managed` marker, `~/.claude-backup/` exists, backup has `manifest.json` |
 
 ## Running
 

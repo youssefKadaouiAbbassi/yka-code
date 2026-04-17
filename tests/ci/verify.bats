@@ -32,8 +32,8 @@
   [ -f ~/.config/starship.toml ]
 }
 
-@test "shell rc has code-tools marker" {
-  grep -q '# code-tools-managed' ~/.zshrc 2>/dev/null || grep -q '# code-tools-managed' ~/.bashrc 2>/dev/null
+@test "shell rc has yka-code marker" {
+  grep -q '# yka-code-managed' ~/.zshrc 2>/dev/null || grep -q '# yka-code-managed' ~/.bashrc 2>/dev/null
 }
 
 @test "backup directory exists" {

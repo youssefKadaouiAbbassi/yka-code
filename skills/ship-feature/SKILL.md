@@ -1,6 +1,6 @@
 ---
 name: ship-feature
-description: [code-tools] End-to-end feature workflow for this system. Use when the user asks to build, implement, add, or ship a new feature. Chains feature-dev (plan → implement) → pr-review-toolkit (multi-agent review) → commit-commands (commit+push+PR). Do NOT use for simple edits, bug fixes, or refactors — this is for net-new feature work.
+description: [yka-code] End-to-end feature workflow for this system. Use when the user asks to build, implement, add, or ship a new feature. Chains feature-dev (plan → implement) → pr-review-toolkit (multi-agent review) → commit-commands (commit+push+PR). Do NOT use for simple edits, bug fixes, or refactors — this is for net-new feature work.
 ---
 
 # Ship Feature Workflow
@@ -52,7 +52,7 @@ Invoke `/feature-dev:feature-dev`. It chains internally:
 
 **For large features (>5 files or >2h estimated):** prefer `/claude-mem:make-plan` first to produce a phased plan, then `/claude-mem:do` to execute phases via subagents. These capture the plan + outcomes in memory for future sessions.
 
-**When the feature uses an unfamiliar library:** call the `docfork` MCP (requires `DOCFORK_API_KEY`, set in `~/.config/code-tools/secrets.env`) for up-to-date library docs before implementing. It's faster than reading source and more current than training data.
+**When the feature uses an unfamiliar library:** call the `docfork` MCP (requires `DOCFORK_API_KEY`, set in `~/.config/yka-code/secrets.env`) for up-to-date library docs before implementing. It's faster than reading source and more current than training data.
 
 **When the feature is a UI component/page:** activate the `frontend-design` skill and optionally use the `playground` skill to prototype interactions in a single-file HTML explorer before wiring into the real app.
 

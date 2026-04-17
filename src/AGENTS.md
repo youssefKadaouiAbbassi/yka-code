@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Core TypeScript source for the `@youssefKadaouiAbbassi/code-tools-setup` installer. This directory contains the runtime logic that detects the environment, backs up existing config, deploys the Primordial tier, installs Recommended / Optional components, and verifies the result. It is consumed by `bin/setup.ts` via the `src/commands/` adapters.
+Core TypeScript source for the `@youssefKadaouiAbbassi/yka-code-setup` installer. This directory contains the runtime logic that detects the environment, backs up existing config, deploys the Primordial tier, installs Recommended / Optional components, and verifies the result. It is consumed by `bin/setup.ts` via the `src/commands/` adapters.
 
 Parent spec: [`../AGENTS.md`](../AGENTS.md) — stack decisions, tier model, and hard rules apply here.
 
@@ -13,7 +13,7 @@ Parent spec: [`../AGENTS.md`](../AGENTS.md) — stack decisions, tier model, and
 | File | Role |
 |------|------|
 | `types.ts` | Single source of truth for type definitions: `DetectedEnvironment`, `InstallPackage`, `InstallResult`, `Component`, `ComponentCategory`, `MCPServerConfig`, `ConfigDeployment`, `BackupManifest`, `VerificationResult`, `VerificationReport`, plus the `OS`, `Shell`, `PackageManager`, `LinuxDistro`, `Tier`, `InstallStatus` unions. No runtime code. |
-| `utils.ts` | Shared helpers — `commandExists`, `getPythonCommand`/`tryGetPythonCommand`, `getCommandVersion`, JSON I/O (`readJson`/`writeJson`/`mergeJsonFile`), file ops (`copyFile`/`copyDir`/`ensureDir`/`fileExists`), `getConfigsDir`, the `mergeSettings` strategy-aware `deepmerge-ts` customizer, `appendToShellRc` (guarded by the `# code-tools-managed` marker), `installBinary` (OS-adaptive package-manager dispatch), `registerMcp` (verified), secrets file I/O (`getSecretsFilePath`/`loadSecretsFromFile`/`saveSecretsToFile`), `promptForMissingEnvVars`, and the `log` picocolors logger. |
+| `utils.ts` | Shared helpers — `commandExists`, `getPythonCommand`/`tryGetPythonCommand`, `getCommandVersion`, JSON I/O (`readJson`/`writeJson`/`mergeJsonFile`), file ops (`copyFile`/`copyDir`/`ensureDir`/`fileExists`), `getConfigsDir`, the `mergeSettings` strategy-aware `deepmerge-ts` customizer, `appendToShellRc` (guarded by the `# yka-code-managed` marker), `installBinary` (OS-adaptive package-manager dispatch), `registerMcp` (verified), secrets file I/O (`getSecretsFilePath`/`loadSecretsFromFile`/`saveSecretsToFile`), `promptForMissingEnvVars`, and the `log` picocolors logger. |
 | `detect.ts` | Environment detection — `detectOS`, `detectShell`, `detectPackageManager`, `detectLinuxDistro`, `detectExistingTools`, `detectClaudeCode`, `detectDocker`, and the composite `detectEnvironment()` that returns a fully populated `DetectedEnvironment`. |
 | `backup.ts` | Timestamped backup subsystem writing to `~/.claude-backup/{YYYYMMDD-HHMMSS}/`. Exports `createBackup`, `backupIfExists`, `listBackups`, `getLatestBackup`, `restoreFromBackup`. Each backup dir has a `manifest.json` listing original/backup paths. |
 | `primordial.ts` | The always-on Tier 0 installer. Backs up the target paths, then deploys `settings.json` (merged), `CLAUDE.md` + `AGENTS.md`/`GEMINI.md` symlinks, hook scripts (`chmod 700`), `jq`, `tmux` + `.tmux.conf`, `starship` + `starship.toml` + shell-rc eval, `mise` + shell-rc eval, `just`, four `git worktree` aliases, telemetry env vars, and `tasks/lessons.md` (never overwritten). Rolls back via `restoreFromPartialManifest` on failure. |
@@ -64,7 +64,7 @@ Every module imports types with `import type { ... } from "./types.js"`. The `.j
 7. **`dryRun` is a required parameter** on every installer. In dry-run mode, log the action with `log.info("[dry-run] Would ...")` and return `status: "skipped"` with `verifyPassed: false`.
 8. **Logging goes through `log.{info,warn,error,success,debug}`** from `utils.ts`. `debug` is gated on `process.env.VERBOSE`. Do not `console.log` directly.
 9. **JSON edits go through `mergeJsonFile(targetPath, patch)`** (strategy-aware deep merge). Do not `JSON.parse` + `Object.assign` — it breaks `permissions.deny` array union and `mcpServers` per-key replace.
-10. **Shell rc edits go through `appendToShellRc(env, lines, sectionName)`**. The helper wraps lines with `# code-tools-managed start:<section>` / `end:<section>` markers and replaces existing blocks in place — safe to re-run.
+10. **Shell rc edits go through `appendToShellRc(env, lines, sectionName)`**. The helper wraps lines with `# yka-code-managed start:<section>` / `end:<section>` markers and replaces existing blocks in place — safe to re-run.
 11. **Config templates resolve via `getConfigsDir()`** which returns `join(import.meta.dir, "..", "configs")`. This works from source, bunx cache, and the compiled standalone binary.
 
 ### Hard Rules (From Parent AGENTS.md, Enforced Here)

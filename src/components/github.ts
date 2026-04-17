@@ -99,7 +99,7 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
       results.push({
         component: "github-mcp",
         status: "skipped",
-        message: "GITHUB_PAT not set — add to ~/.config/code-tools/secrets.env and re-run",
+        message: "GITHUB_PAT not set — add to ~/.config/yka-code/secrets.env and re-run",
         verifyPassed: false,
       });
     } else {

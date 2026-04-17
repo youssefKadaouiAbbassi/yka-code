@@ -194,7 +194,7 @@ async function createManifest(backupPath: string, timestamp: string, targetDir: 
   };
 }
 
-const CODE_TOOLS_MANAGED_MCPS = [
+const YKA_CODE_MANAGED_MCPS = [
   "serena",
   "claude-mem",
   "context-mode",
@@ -213,14 +213,14 @@ async function cleanMcpConfiguration(claudeDir: string): Promise<void> {
       const m = line.match(/^([\w.:@-]+):/);
       const name = m?.[1];
       if (!name || name.startsWith("claude.ai") || name.startsWith("plugin:")) continue;
-      if (CODE_TOOLS_MANAGED_MCPS.includes(name)) managed.push(name);
+      if (YKA_CODE_MANAGED_MCPS.includes(name)) managed.push(name);
       else userOwned.push(name);
     }
 
     for (const name of managed) {
       await $`claude mcp remove ${name} -s user`.quiet().nothrow();
     }
-    log.info(`✓ Cleared ${managed.length} code-tools MCP server(s) via claude mcp remove`);
+    log.info(`✓ Cleared ${managed.length} yka-code MCP server(s) via claude mcp remove`);
     if (userOwned.length > 0) {
       log.info(`✓ Preserved ${userOwned.length} user-owned MCP(s): ${userOwned.join(", ")}`);
     }
@@ -239,7 +239,7 @@ async function cleanMcpConfiguration(claudeDir: string): Promise<void> {
   } catch { /* no legacy file */ }
 }
 
-const MANAGED_MANIFEST = ".code-tools-managed.json";
+const MANAGED_MANIFEST = ".yka-code-managed.json";
 
 async function readManagedEntries(dir: string): Promise<string[] | null> {
   try {

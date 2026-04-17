@@ -35,7 +35,7 @@ fi
 
 if command -v claude >/dev/null 2>&1; then
   if ! claude mcp list 2>/dev/null | grep -q '^serena:'; then
-    printf 'drift: MCP "serena" not registered (run code-tools setup)\n'
+    printf 'drift: MCP "serena" not registered (run yka-code setup)\n'
   fi
 fi
 

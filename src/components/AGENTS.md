@@ -62,7 +62,7 @@ Every component install in this directory follows the same pattern. Deviating br
 ### Hard Rules
 
 1. **Idempotency is mandatory.** Re-running `install()` must be a no-op on already-installed components. Tests in `tests/integration/` re-run the installer twice.
-2. **Never silently overwrite state.** MCP config is deep-merged. Shell RC edits go through `appendToShellRc(env, lines, marker)` with a `# code-tools-managed` marker to prevent duplicate appends.
+2. **Never silently overwrite state.** MCP config is deep-merged. Shell RC edits go through `appendToShellRc(env, lines, marker)` with a `# yka-code-managed` marker to prevent duplicate appends.
 3. **OS-adaptive.** Every binary package must declare `brew` / `apt` / `pacman` / `dnf` / `curl` / `manual` variants in its `packages[]` and let `installBinary()` pick. Do not hardcode a single package manager.
 4. **Supply-chain pins are non-negotiable.** `crawl4ai` is pinned to `>=0.8.6` (v0.8.5 had a confirmed supply-chain compromise). `claude-mem` MCP **must** bind to `127.0.0.1` (port 37777 is unauthenticated by default). Both live here — do not relax either.
 5. **Every component must return an `InstallResult`.** Even SaaS-only or GitHub-Actions-only entries (CodeRabbit, Google Stitch, Claude Code Action) push a `status: "skipped"` result with actionable guidance.
@@ -89,7 +89,7 @@ Consistent with root `AGENTS.md`: author component changes here, then hand appro
 | `commandExists` | `../utils.js` | Binary probe via `Bun.which` |
 | `installBinary` | `../utils.js` | OS-adaptive dispatcher for `brew`/`apt`/`pacman`/`dnf`/`curl` |
 | `mergeJsonFile` | `../utils.js` | `deepmerge-ts`-backed JSON patch for MCP config |
-| `appendToShellRc` | `../utils.js` | Guarded shell RC edits with `# code-tools-managed` markers |
+| `appendToShellRc` | `../utils.js` | Guarded shell RC edits with `# yka-code-managed` markers |
 | `log` | `../utils.js` | `picocolors`+`@clack/prompts`-aware logger |
 | `$` | `bun` | Shell primitive for all external commands |
 

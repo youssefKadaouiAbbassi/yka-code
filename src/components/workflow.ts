@@ -50,13 +50,13 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
       results.push({
         component: "Composio",
         status: "skipped",
-        message: "COMPOSIO_API_KEY not set — add to ~/.config/code-tools/secrets.env and re-run",
+        message: "COMPOSIO_API_KEY not set — add to ~/.config/yka-code/secrets.env and re-run",
         verifyPassed: false,
       });
     } else {
       if (!serverId) {
         const body = JSON.stringify({
-          name: "code-tools",
+          name: "yka-code",
           auth_config_ids: [],
           no_auth_apps: ["composio"],
         });
@@ -71,7 +71,7 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
         if (parsed.id && /^[A-Za-z0-9_-]{6,}$/.test(parsed.id)) {
           serverId = parsed.id;
           log.info(`Composio bootstrap MCP server created: ${serverId}`);
-          const secretsPath = `${env.homeDir}/.config/code-tools/secrets.env`;
+          const secretsPath = `${env.homeDir}/.config/yka-code/secrets.env`;
           await fs.mkdir(dirname(secretsPath), { recursive: true });
           let existing = "";
           try { existing = await fs.readFile(secretsPath, "utf-8"); } catch { }

@@ -2,7 +2,7 @@
 # Built on working foundation with proper caching
 
 # Stage 1: Dependencies (cached unless package.json/bun.lock change)
-FROM code-tools-base AS deps
+FROM yka-code-base AS deps
 WORKDIR /workspace
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile

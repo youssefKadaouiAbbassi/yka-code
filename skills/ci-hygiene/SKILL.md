@@ -1,6 +1,6 @@
 ---
 name: ci-hygiene
-description: [code-tools] CI/CD and DevOps hygiene enforcer. Activates when editing GitHub Actions workflows, Dockerfiles, docker-compose, justfile, deploy scripts, or any CI configuration. Enforces pinned versions, proper Claude Code invocation in CI (--bare, API key not Max sub), secret management, and reproducibility. Fills the DevOps gap — no plugin covers this in the wild.
+description: [yka-code] CI/CD and DevOps hygiene enforcer. Activates when editing GitHub Actions workflows, Dockerfiles, docker-compose, justfile, deploy scripts, or any CI configuration. Enforces pinned versions, proper Claude Code invocation in CI (--bare, API key not Max sub), secret management, and reproducibility. Fills the DevOps gap — no plugin covers this in the wild.
 ---
 
 # CI Hygiene — make CI deterministic and safe

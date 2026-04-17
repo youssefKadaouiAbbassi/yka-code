@@ -17,17 +17,17 @@ async function detectInstallSource(): Promise<{ source: InstallSource; hint: str
 
   const exec = process.execPath;
   if (exec.includes("/_npx/") || exec.includes(`${homedir()}/.npm/_npx/`)) {
-    return { source: "npx", hint: "re-invoke via `npx @youssefKadaouiAbbassi/code-tools-setup@latest update`" };
+    return { source: "npx", hint: "re-invoke via `npx @youssefKadaouiAbbassi/yka-code-setup@latest update`" };
   }
 
   if (exec.includes("/dist/") || import.meta.dir.includes("/dist/")) {
-    return { source: "unknown", hint: "this is a compiled binary — download the newer release from GitHub, or run `npm i -g @youssefKadaouiAbbassi/code-tools-setup@latest`" };
+    return { source: "unknown", hint: "this is a compiled binary — download the newer release from GitHub, or run `npm i -g @youssefKadaouiAbbassi/yka-code-setup@latest`" };
   }
 
   if (commandExists("npm")) {
     const ls = await $`npm ls -g --depth=0 --json`.quiet().nothrow();
-    if (ls.exitCode === 0 && ls.text().includes("@youssefKadaouiAbbassi/code-tools-setup")) {
-      return { source: "npm-global", hint: "npm i -g @youssefKadaouiAbbassi/code-tools-setup@latest" };
+    if (ls.exitCode === 0 && ls.text().includes("@youssefKadaouiAbbassi/yka-code-setup")) {
+      return { source: "npm-global", hint: "npm i -g @youssefKadaouiAbbassi/yka-code-setup@latest" };
     }
   }
 

@@ -15,7 +15,7 @@ const createdBackupDirs: string[] = [];
 const REAL_BACKUP_BASE = join(Bun.env.HOME ?? "~", ".claude-backup");
 
 beforeEach(async () => {
-  tmpDir = await mkdtemp(join(tmpdir(), "code-tools-backup-test-"));
+  tmpDir = await mkdtemp(join(tmpdir(), "yka-code-backup-test-"));
 });
 
 afterEach(async () => {

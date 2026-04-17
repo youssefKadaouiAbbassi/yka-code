@@ -129,12 +129,12 @@ export async function registerMcp(
   return new RegExp(`^${name}:`, "m").test(listed.text());
 }
 
-const MARKER = "# code-tools-managed";
+const MARKER = "# yka-code-managed";
 
 export async function appendToShellRc(
   env: DetectedEnvironment,
   lines: string[],
-  sectionName = "code-tools"
+  sectionName = "yka-code"
 ): Promise<void> {
   const rcPath = env.shellRcPath;
   let content = "";
@@ -207,7 +207,7 @@ export async function installBinary(
 }
 
 export function getSecretsFilePath(homeDir: string): string {
-  return join(homeDir, ".config", "code-tools", "secrets.env");
+  return join(homeDir, ".config", "yka-code", "secrets.env");
 }
 
 export async function loadSecretsFromFile(path: string): Promise<Record<string, string>> {
@@ -237,7 +237,7 @@ export async function saveSecretsToFile(path: string, additions: Record<string, 
   await mkdir(dirname(path), { recursive: true });
 
   const header = [
-    "# Managed by code-tools — API keys for MCP servers and integrations.",
+    "# Managed by yka-code — API keys for MCP servers and integrations.",
     "# Sourced by your shell rc. Do NOT commit this file.",
     "",
   ].join("\n");

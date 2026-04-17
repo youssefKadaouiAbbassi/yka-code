@@ -33,7 +33,7 @@ const SCOPE_OWNERS = new Set([
   // This is the documented exception per Phase 5; destructive restore still goes through
   // the user confirmation flow before touching ~/.claude.
   "restore.ts",
-  // install-journal.ts owns ~/.config/code-tools/install.json — a per-user
+  // install-journal.ts owns ~/.config/yka-code/install.json — a per-user
   // installer-state file, not scope-dependent. homedir() is the correct path root.
   "install-journal.ts",
   // update.ts reads homedir() only to detect `~/.npm/_npx/` invocation path for

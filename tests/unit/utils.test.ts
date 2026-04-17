@@ -16,7 +16,7 @@ import type { DetectedEnvironment } from "../../src/types.js";
 let tmpDir: string;
 
 beforeEach(async () => {
-  tmpDir = await mkdtemp(join(tmpdir(), "code-tools-test-"));
+  tmpDir = await mkdtemp(join(tmpdir(), "yka-code-test-"));
 });
 
 afterEach(async () => {
@@ -130,7 +130,7 @@ describe("appendToShellRc", () => {
     await appendToShellRc(env, ['export FOO="bar"'], "my-section");
 
     const content = await Bun.file(rcPath).text();
-    const startCount = (content.match(/# code-tools-managed start:my-section/g) ?? []).length;
+    const startCount = (content.match(/# yka-code-managed start:my-section/g) ?? []).length;
     expect(startCount).toBe(1);
   });
 

@@ -6,7 +6,7 @@ Parent: [`../AGENTS.md`](../AGENTS.md)
 
 ## Purpose
 
-CLI executable entry points for `@youssefKadaouiAbbassi/code-tools-setup`. This directory contains the thin dispatcher layer that `package.json` exposes via the `bin` field and that `bunx` invokes. All business logic lives in `../src/`; files here only parse arguments and delegate to the command modules in `../src/commands/`.
+CLI executable entry points for `@youssefKadaouiAbbassi/yka-code-setup`. This directory contains the thin dispatcher layer that `package.json` exposes via the `bin` field and that `bunx` invokes. All business logic lives in `../src/`; files here only parse arguments and delegate to the command modules in `../src/commands/`.
 
 ## Key Files
 
@@ -20,7 +20,7 @@ Resolution path:
 package.json "bin"                    -> ./bin/setup.ts
 bunx @youssefKadaouiAbbassi/...-setup -> bin/setup.ts
 bun run dev / bun run start           -> bin/setup.ts
-bun run build                         -> compiles bin/setup.ts to dist/code-tools-setup
+bun run build                         -> compiles bin/setup.ts to dist/yka-code-setup
 ```
 
 ## Invocation
@@ -53,8 +53,8 @@ bun run bin/setup.ts --dry-run --verbose
 - **Keep `bin/` thin.** `setup.ts` must remain a dispatcher. New logic, prompts, filesystem work, and install steps belong in `../src/` (usually `../src/commands/` or `../src/components/`), never here.
 - **Subcommands are lazy-imported.** Every entry in `subCommands` uses `() => import(...).then(m => m.default)` so bunx startup stays fast and unused code paths never load. Follow the same pattern when registering new subcommands.
 - **Shebang is required.** `#!/usr/bin/env bun` must be the first line — `npm`/`bun` use it when the package is installed globally and the file is invoked directly.
-- **Entry is declared in `package.json`.** The `bin` field maps `code-tools-setup` -> `./bin/setup.ts`. Renaming the file requires updating `package.json`, `scripts.dev`, `scripts.start`, `scripts.build`, `scripts.build:npm`, and the `bootstrap.sh` / README invocation examples.
-- **Default command is `setup`.** The root `run()` delegates to `src/commands/setup.js` so `bunx @youssefKadaouiAbbassi/code-tools-setup` (no subcommand) installs. Do not change this without a deprecation plan.
+- **Entry is declared in `package.json`.** The `bin` field maps `yka-code-setup` -> `./bin/setup.ts`. Renaming the file requires updating `package.json`, `scripts.dev`, `scripts.start`, `scripts.build`, `scripts.build:npm`, and the `bootstrap.sh` / README invocation examples.
+- **Default command is `setup`.** The root `run()` delegates to `src/commands/setup.js` so `bunx @youssefKadaouiAbbassi/yka-code-setup` (no subcommand) installs. Do not change this without a deprecation plan.
 - **Import from compiled paths.** Dynamic imports use the `.js` extension (`../src/commands/setup.js`) — this is correct under `tsconfig`'s `ESNext`/`bun-types` setup because Bun resolves `.js` specifiers to the neighboring `.ts` source. Do not switch to `.ts` specifiers; it breaks the compiled `bun build --compile` artifact.
 - **Stack is locked.** CLI parsing is `citty`. Do not swap in `commander`, `yargs`, or `cac`. Prompts, colors, and JSON merging stay in their assigned libraries (see parent `AGENTS.md`).
 

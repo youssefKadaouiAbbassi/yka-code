@@ -4,7 +4,7 @@
 
 ## Purpose
 
-CI/CD workflows and GitHub automation for the `code-tools` installer. This directory holds every pipeline that runs on `push` and `pull_request` against `master` — unit, integration, e2e, hook linting, and post-install BATS verification across Ubuntu and macOS runners.
+CI/CD workflows and GitHub automation for the `yka-code` installer. This directory holds every pipeline that runs on `push` and `pull_request` against `master` — unit, integration, e2e, hook linting, and post-install BATS verification across Ubuntu and macOS runners.
 
 Parent: [`../AGENTS.md`](../AGENTS.md).
 

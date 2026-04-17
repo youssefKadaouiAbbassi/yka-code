@@ -8,7 +8,7 @@ import type { Component, DetectedEnvironment, InstallResult } from "../../src/ty
 let tmpDir: string;
 
 beforeEach(async () => {
-  tmpDir = await mkdtemp(join(tmpdir(), "code-tools-verify-test-"));
+  tmpDir = await mkdtemp(join(tmpdir(), "yka-code-verify-test-"));
 });
 
 afterEach(async () => {

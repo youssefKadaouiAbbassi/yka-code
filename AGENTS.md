@@ -1,12 +1,12 @@
 <!-- Generated: 2026-04-14 | Updated: 2026-04-14 -->
 
-# code-tools
+# yka-code
 
 ## Purpose
 
 Interactive CLI installer for the **Ultimate Claude Code System v12** — a 40-component Claude Code development environment. This repository is the **installer/setup tool**, not the installed system itself. It scaffolds a complete workstation (hooks, MCP servers, agents, sandbox, observability) onto any supported machine.
 
-- **Package:** `@youssefKadaouiAbbassi/code-tools-setup`
+- **Package:** `@youssefKadaouiAbbassi/yka-code-setup`
 - **Runtime:** Bun (>= 1.2) with TypeScript
 - **UI:** `@clack/prompts` interactive TUI with `picocolors`
 - **Target system:** 40 components, 7 MCP servers, 12 principles (see `README.md`)
@@ -15,16 +15,16 @@ Interactive CLI installer for the **Ultimate Claude Code System v12** — a 40-c
 
 ```bash
 # Normal interactive install (requires Bun)
-bunx @youssefKadaouiAbbassi/code-tools-setup
+bunx @youssefKadaouiAbbassi/yka-code-setup
 
 # Non-interactive (CI)
-bunx @youssefKadaouiAbbassi/code-tools-setup --non-interactive
+bunx @youssefKadaouiAbbassi/yka-code-setup --non-interactive
 
 # Preview only
-bunx @youssefKadaouiAbbassi/code-tools-setup --dry-run
+bunx @youssefKadaouiAbbassi/yka-code-setup --dry-run
 
 # Fresh machine (installs Bun, Claude Code, jq, then runs installer)
-curl -fsSL https://raw.githubusercontent.com/youssefKadaouiAbbassi/code-tools/master/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/youssefKadaouiAbbassi/yka-code/master/bootstrap.sh | bash
 ```
 
 ### Local Development
@@ -33,7 +33,7 @@ curl -fsSL https://raw.githubusercontent.com/youssefKadaouiAbbassi/code-tools/ma
 bun install
 bun run dev        # run the installer from source
 bun test           # full test suite (unit + integration + e2e)
-bun run build      # compile standalone binary -> dist/code-tools-setup
+bun run build      # compile standalone binary -> dist/yka-code-setup
 bun run build:npm  # build npm-publishable bundle
 ```
 
@@ -47,14 +47,14 @@ Three install tiers gate every component:
 | **Recommended** | yes/no | **yes** | Code Intelligence (Serena + ast-grep), Browser+Web (Playwright + Crawl4AI + Docfork + DeepWiki), Memory+Context (claude-mem + context-mode + claude-hud), cc-plugins (Anthropic official marketplace), skills-registry (skills.sh seed bundle), Security (Snyk + container-use), GitHub stack, Workstation extras |
 | **Optional** | yes/no | **no** | Observability (ccflare), Orchestration (Multica), Design (Stitch + awesome-design-md), Knowledge (Obsidian + claude-obsidian), Workflow (n8n + Composio) |
 
-Primordial files are **backed up then overridden** at `~/.claude-backup/{timestamp}/`. Component installs must be **idempotent** (check before acting), MCP entries must be **deep-merged** into existing JSON, and shell rc edits use the `# code-tools-managed` marker to prevent duplication.
+Primordial files are **backed up then overridden** at `~/.claude-backup/{timestamp}/`. Component installs must be **idempotent** (check before acting), MCP entries must be **deep-merged** into existing JSON, and shell rc edits use the `# yka-code-managed` marker to prevent duplication.
 
 ## Key Files
 
 | File | Description |
 |------|-------------|
 | `README.md` | v12 system architecture: components, MCP servers, principles, MCP config, validation trail |
-| `package.json` | Bun package (`@youssefKadaouiAbbassi/code-tools-setup` v0.1.0), scripts, engines, publish config |
+| `package.json` | Bun package (`@youssefKadaouiAbbassi/yka-code-setup` v0.1.0), scripts, engines, publish config |
 | `tsconfig.json` | TypeScript config (ES2022, ESNext modules, strict, `bun-types`) |
 | `bootstrap.sh` | Fresh-machine entrypoint — installs Bun + Claude Code + jq, then `bunx` the installer |
 | `bun.lock` | Bun lockfile — commit with dependency changes |
@@ -94,7 +94,7 @@ Each subdirectory has its own `AGENTS.md` (or should) with the detailed contract
 1. **Idempotency is mandatory.** Every `install()` must check `verify()` first and return `{ skipped: true }` if already installed.
 2. **Never overwrite without backup.** Primordial files must call `backup.ts` before writing. `tasks/lessons.md` is **never** overwritten once it exists.
 3. **Deep-merge JSON, never replace.** Use `deepmerge-ts` for `settings.json`, `.mcp.json`, `.gitconfig` modifications.
-4. **Shell rc edits are guarded.** Wrap additions with `# code-tools-managed` markers and check for them before appending.
+4. **Shell rc edits are guarded.** Wrap additions with `# yka-code-managed` markers and check for them before appending.
 5. **OS-adaptive installs.** Every binary install must handle brew / apt / pacman / dnf (plus `curl|sh` fallbacks) via the `installBinary(pkg, env)` helper in `src/utils.ts`.
 6. **Supply-chain pins.** Crawl4AI pinned to `>=0.8.6` (v0.8.5 was compromised). claude-mem must bind to `127.0.0.1` (port 37777 is unauthenticated by default).
 7. **Config file resolution.** Use `new URL("../configs", import.meta.url).pathname` so templates resolve whether the installer runs from source, bunx cache, or compiled binary.

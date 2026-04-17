@@ -92,7 +92,7 @@ async function deployClaudeMd(env: DetectedEnvironment, dryRun: boolean, deployM
   }
 }
 
-const MANIFEST_NAME = ".code-tools-managed.json";
+const MANIFEST_NAME = ".yka-code-managed.json";
 const MANIFEST_VERSION = 1;
 
 type DeployManifest = { version?: number; entries: string[] };

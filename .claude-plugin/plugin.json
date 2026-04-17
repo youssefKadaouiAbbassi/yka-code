@@ -1,13 +1,13 @@
 {
-  "name": "code-tools",
+  "name": "yka-code",
   "description": "Ultimate Claude Code harness — /do orchestrator, 17 skills (ship-feature, fix-bug, refactor-safely, security-audit, onboard-codebase + 12 more), 3 subagents, 19 hooks (pre-secrets-guard, pre-destructive-blocker, pre-pr-gate + 16 more), plugin-mode discovery and CLI installer.",
   "version": "0.1.0",
   "author": {
     "name": "Youssef Kadaoui Abbassi",
     "url": "https://github.com/youssefKadaouiAbbassi"
   },
-  "homepage": "https://github.com/youssefKadaouiAbbassi/code-tools",
-  "repository": "https://github.com/youssefKadaouiAbbassi/code-tools",
+  "homepage": "https://github.com/youssefKadaouiAbbassi/yka-code",
+  "repository": "https://github.com/youssefKadaouiAbbassi/yka-code",
   "license": "MIT",
   "keywords": [
     "claude-code",

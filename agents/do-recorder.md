@@ -1,6 +1,6 @@
 ---
 name: do-recorder
-description: [code-tools] Captures compact, high-signal learnings from a completed /do workflow into the appropriate CLAUDE.md (project-level or user-level). Decides whether the lesson is worth recording — skips if nothing was surprising. Use as Phase 7 of the /do orchestrator.
+description: [yka-code] Captures compact, high-signal learnings from a completed /do workflow into the appropriate CLAUDE.md (project-level or user-level). Decides whether the lesson is worth recording — skips if nothing was surprising. Use as Phase 7 of the /do orchestrator.
 tools: Read, Edit, Glob, Bash
 ---
 

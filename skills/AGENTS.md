@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Skill definitions for the Claude Code skill system. A **skill** is a self-contained capability exposed to Claude Code as a slash command — declared by a `SKILL.md` front-matter manifest plus any supporting files in its directory. Skills here ship with the installer so that the installed Claude Code environment can invoke `code-tools` workflows (such as running the installer itself) via slash commands.
+Skill definitions for the Claude Code skill system. A **skill** is a self-contained capability exposed to Claude Code as a slash command — declared by a `SKILL.md` front-matter manifest plus any supporting files in its directory. Skills here ship with the installer so that the installed Claude Code environment can invoke `yka-code` workflows (such as running the installer itself) via slash commands.
 
 Parent context: `../AGENTS.md` (root repository contract).
 
@@ -60,7 +60,7 @@ Author skill changes here; hand the approval pass to `code-reviewer` or `verifie
 ## Dependencies
 
 - **Claude Code skill system** — host runtime that discovers skills via the `SKILL.md` manifest and exposes them as slash commands.
-- **Installer entry points** (`bin/setup.ts`, `bunx @youssefKadaouiAbbassi/code-tools-setup`) — skills delegate to these; they are not reimplemented inside skill files.
+- **Installer entry points** (`bin/setup.ts`, `bunx @youssefKadaouiAbbassi/yka-code-setup`) — skills delegate to these; they are not reimplemented inside skill files.
 - **Bun** `>= 1.2` — required by any skill that invokes `bun run ...`.
 
 <!-- MANUAL: -->

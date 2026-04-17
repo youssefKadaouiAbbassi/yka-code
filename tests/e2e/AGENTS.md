@@ -4,7 +4,7 @@
 
 ## Purpose
 
-End-to-end integration tests for the **code-tools installer**. These tests run the installer inside isolated Docker containers (Ubuntu / Arch / Fedora) against a pristine environment, then assert that the expected `~/.claude/` layout, hooks, permissions, and binaries are in place. They catch OS-specific regressions (package manager paths, shell rc layouts, hook executability) that unit and integration tests cannot.
+End-to-end integration tests for the **yka-code installer**. These tests run the installer inside isolated Docker containers (Ubuntu / Arch / Fedora) against a pristine environment, then assert that the expected `~/.claude/` layout, hooks, permissions, and binaries are in place. They catch OS-specific regressions (package manager paths, shell rc layouts, hook executability) that unit and integration tests cannot.
 
 - **Framework:** `bun test` + `testcontainers` (`GenericContainer.fromDockerfile`)
 - **Isolation:** each test builds a fresh image and starts a throwaway container
@@ -65,8 +65,8 @@ The suite uses `describe.skipIf(!hasDocker || !runE2E)` — if Docker is unreach
 - Tests pipe installer output via `2>&1` into `exec.output`. Print `installResult.output` / `result.output` in the failing assertion to see what the container saw.
 - To repro interactively, build the image manually and drop into a shell:
   ```bash
-  docker build -t code-tools-e2e -f tests/e2e/containers/ubuntu.Dockerfile .
-  docker run --rm -it -v "$PWD:/app" -w /app code-tools-e2e bash
+  docker build -t yka-code-e2e -f tests/e2e/containers/ubuntu.Dockerfile .
+  docker run --rm -it -v "$PWD:/app" -w /app yka-code-e2e bash
   # then: bun install --frozen-lockfile && bun run bin/setup.ts --non-interactive --tier primordial
   ```
 - Do NOT `docker exec` into a test-owned container — the `finally { container.stop() }` block tears it down as soon as the test returns.

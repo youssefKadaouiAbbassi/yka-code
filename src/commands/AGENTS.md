@@ -28,7 +28,7 @@ subCommands: {
 }
 ```
 
-The default command (no subcommand) re-invokes `setup` with the same `rawArgs`, so `bunx @youssefKadaouiAbbassi/code-tools-setup` and `... setup` are equivalent.
+The default command (no subcommand) re-invokes `setup` with the same `rawArgs`, so `bunx @youssefKadaouiAbbassi/yka-code-setup` and `... setup` are equivalent.
 
 ### setup.ts flags
 

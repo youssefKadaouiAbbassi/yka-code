@@ -16,7 +16,7 @@ export type InstallJournal = {
 };
 
 export function getJournalPath(): string {
-  return process.env.CODE_TOOLS_JOURNAL_PATH ?? join(homedir(), ".config", "code-tools", "install.json");
+  return process.env.YKA_CODE_JOURNAL_PATH ?? join(homedir(), ".config", "yka-code", "install.json");
 }
 
 export async function readJournal(): Promise<InstallJournal | null> {

@@ -1,15 +1,15 @@
 ---
 name: setup
-description: [code-tools] Install or update the Ultimate Claude Code System. Use when the user asks to set up, install, bootstrap, or reinstall the code-tools harness (hooks, MCP servers, skills, plugins, shell rc).
+description: [yka-code] Install or update the Ultimate Claude Code System. Use when the user asks to set up, install, bootstrap, or reinstall the yka-code harness (hooks, MCP servers, skills, plugins, shell rc).
 ---
 
 # Setup Skill
 
-Launches the `code-tools-setup` CLI installer.
+Launches the `yka-code-setup` CLI installer.
 
 ## Usage
 
-Run `bunx @youssefKadaouiAbbassi/code-tools-setup` (or `bun run bin/setup.ts` from this repo).
+Run `bunx @youssefKadaouiAbbassi/yka-code-setup` (or `bun run bin/setup.ts` from this repo).
 
 What it does:
 

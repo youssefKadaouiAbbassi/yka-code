@@ -22,7 +22,7 @@ This directory is **the primordial tier** — files here install silently with n
 | `home-claude/` | `~/.claude/` | User-scope Claude Code config — global defaults for all projects |
 | `project-claude/` | `<project>/.claude/` | Project-scope Claude Code config — per-repo overrides and project hooks |
 | `hooks/` | `~/.claude/hooks/` | User-scope hook scripts (PreToolUse, PostToolUse, PreCompact, PostCompact, StopFailure, PermissionDenied, FileChanged, CwdChanged, Elicitation, SessionStart, SessionEnd, Stop) referenced by `home-claude/settings.json` |
-| `plugins/code-tools-health/` | manual `claude plugin install <path>` | Reference implementation of the Claude Code `monitors` manifest key (v2.1.105+). One monitor — `primordial-install-health` — that notifies when hooks drift, `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` is unset, or the Serena MCP registration is missing. Not auto-installed; opt-in. |
+| `plugins/yka-code-health/` | manual `claude plugin install <path>` | Reference implementation of the Claude Code `monitors` manifest key (v2.1.105+). One monitor — `primordial-install-health` — that notifies when hooks drift, `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` is unset, or the Serena MCP registration is missing. Not auto-installed; opt-in. |
 
 ### `home-claude/` — used when installer runs with `--global` (default)
 
@@ -82,7 +82,7 @@ We deliberately ship no dedicated observability category. The behavioral surface
 
 ### Working In `configs/`
 
-- **These are templates, not live config.** Do not edit them expecting your own Claude Code to change — edits here ship to users on their next `bunx @youssefKadaouiAbbassi/code-tools-setup` run.
+- **These are templates, not live config.** Do not edit them expecting your own Claude Code to change — edits here ship to users on their next `bunx @youssefKadaouiAbbassi/yka-code-setup` run.
 - **Hook scripts must stay shellcheck-clean.** CI runs `bun run lint:hooks` against `configs/hooks/*.sh` and `configs/project-claude/hooks/*.sh` (see root `AGENTS.md` > Testing Requirements).
 - **Hooks must exit quickly.** Every hook runs on every matching tool call — slow hooks degrade UX. Keep startup < 100ms; use `command -v` checks, avoid unbounded `find`.
 - **Hook contract differs by event.** PreToolUse uses `{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"…"}}` to block (the deprecated top-level `{"decision":"block"}` fails CC's validator). PostToolUse / Stop / SessionStart are advisory — emit to **stderr** only; do not emit `{"decision":"allow"}` (obsolete schema, noise). Never exit non-zero on the allow path.

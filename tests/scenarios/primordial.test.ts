@@ -21,7 +21,7 @@ import {
   log,
 } from "../../src/utils.js";
 
-const PROJECT_DIR = "/home/izno/code/perso/github.com/youssefKadaouiAbbassi/code-tools";
+const PROJECT_DIR = "/home/izno/code/perso/github.com/youssefKadaouiAbbassi/yka-code";
 const REAL_CONFIGS_DIR = join(PROJECT_DIR, "configs");
 const REAL_BACKUP_BASE = join(Bun.env.HOME ?? "~", ".claude-backup");
 
@@ -76,7 +76,7 @@ function mockEnv(tempDir: string): DetectedEnvironment {
 }
 
 beforeEach(async () => {
-  tmpDir = await mkdtemp(join(tmpdir(), "code-tools-primordial-"));
+  tmpDir = await mkdtemp(join(tmpdir(), "yka-code-primordial-"));
   await writeFile(join(tmpDir, ".zshrc"), "# existing rc\n");
 });
 
@@ -155,7 +155,7 @@ describe("installPrimordial", () => {
     await installPrimordial(env, false);
 
     const rcContent = await Bun.file(join(tmpDir, ".zshrc")).text();
-    expect(rcContent).toContain("# code-tools-managed");
+    expect(rcContent).toContain("# yka-code-managed");
   });
 
   test("lessons.md never overwritten on second run", async () => {

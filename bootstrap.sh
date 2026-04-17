@@ -51,5 +51,5 @@ fi
 
 # Run the installer in non-interactive mode
 echo ""
-echo "Running code-tools setup..."
-bunx @youssefKadaouiAbbassi/code-tools-setup --non-interactive
+echo "Running yka-code setup..."
+bunx @youssefKadaouiAbbassi/yka-code-setup --non-interactive

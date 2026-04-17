@@ -12,11 +12,11 @@ echo "=============================================="
 
 # Step 1: Rebuild container with all fixes
 echo "📦 Rebuilding behavioral container with comprehensive fixes..."
-docker build -f tests/containers/behavioral.Dockerfile -t code-tools-behavioral:latest .
+docker build -f tests/containers/behavioral.Dockerfile -t yka-code-behavioral:latest .
 
 # Step 2: Verify container fixes
 echo "🔍 Verifying container configuration..."
-VERIFY_RESULT=$(docker run --rm --user tester code-tools-behavioral:latest bash -c "
+VERIFY_RESULT=$(docker run --rm --user tester yka-code-behavioral:latest bash -c "
 echo '=== ENVIRONMENT CHECK ==='
 which bun && bun --version
 which claude && claude --version
@@ -39,7 +39,7 @@ BEHAVIORAL_RESULT=$(timeout 300 docker run --rm \
     -v "$(pwd)":/workspace \
     -w /workspace \
     --user tester \
-    code-tools-behavioral:latest \
+    yka-code-behavioral:latest \
     bash -c "
 # Use smart auth setup to preserve container configs
 smart-auth-setup.sh /home/tester/.claude-host /home/tester/.claude

@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Task tracking and project management artifacts for the `code-tools` installer itself. This directory is **dogfooded** — the same `tasks/lessons.md` corrections log that the installer deploys into every target project also lives here and governs work on this repo.
+Task tracking and project management artifacts for the `yka-code` installer itself. This directory is **dogfooded** — the same `tasks/lessons.md` corrections log that the installer deploys into every target project also lives here and governs work on this repo.
 
 Parent: [`../AGENTS.md`](../AGENTS.md)
 

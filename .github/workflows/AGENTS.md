@@ -4,7 +4,7 @@
 
 ## Purpose
 
-GitHub Actions workflow definitions that drive CI/CD for `code-tools`. Every push and pull request to `master` triggers the test matrix defined here: TypeScript unit/integration tests, shellcheck linting, containerized e2e tests, and BATS post-install verification on Ubuntu and macOS. These workflows are the **gate** that enforces the hard rules in the parent `AGENTS.md` (idempotency, shellcheck-clean hooks, passing test suite) before anything merges.
+GitHub Actions workflow definitions that drive CI/CD for `yka-code`. Every push and pull request to `master` triggers the test matrix defined here: TypeScript unit/integration tests, shellcheck linting, containerized e2e tests, and BATS post-install verification on Ubuntu and macOS. These workflows are the **gate** that enforces the hard rules in the parent `AGENTS.md` (idempotency, shellcheck-clean hooks, passing test suite) before anything merges.
 
 ## Key Files
 

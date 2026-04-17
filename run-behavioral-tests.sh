@@ -6,7 +6,7 @@ echo "========================================="
 
 # Build container with latest fixes
 echo "📦 Building behavioral test container..."
-docker build -f tests/containers/behavioral.Dockerfile -t code-tools-behavioral:latest .
+docker build -f tests/containers/behavioral.Dockerfile -t yka-code-behavioral:latest .
 
 # Run behavioral tests in container
 echo "🧪 Executing behavioral tests with real Claude AI..."
@@ -16,7 +16,7 @@ docker run --rm \
     -v "$(pwd)":/workspace \
     -w /workspace \
     --user tester \
-    code-tools-behavioral:latest \
+    yka-code-behavioral:latest \
     bash -c '
 # Copy auth from host but preserve container configs
 smart-auth-setup.sh /home/tester/.claude-host /home/tester/.claude

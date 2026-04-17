@@ -43,7 +43,7 @@ describe("performCleanInstall manifest-awareness", () => {
       "user-theirs/SKILL.md": "user-owned",
     });
     await fs.writeFile(
-      join(skillsDir, ".code-tools-managed.json"),
+      join(skillsDir, ".yka-code-managed.json"),
       JSON.stringify({ version: 1, entries: ["ours"] }),
     );
 
@@ -58,12 +58,12 @@ describe("performCleanInstall manifest-awareness", () => {
     const hooksDir = join(claudeDir, "hooks");
     await seedDir(hooksDir, { "ours.sh": "#!/bin/bash" });
     await fs.writeFile(
-      join(hooksDir, ".code-tools-managed.json"),
+      join(hooksDir, ".yka-code-managed.json"),
       JSON.stringify({ version: 1, entries: ["ours.sh"] }),
     );
 
     await performCleanInstall(claudeDir);
 
-    expect(fs.access(join(hooksDir, ".code-tools-managed.json"))).rejects.toThrow();
+    expect(fs.access(join(hooksDir, ".yka-code-managed.json"))).rejects.toThrow();
   });
 });

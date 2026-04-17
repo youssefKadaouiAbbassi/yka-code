@@ -71,7 +71,7 @@ bun test tests/integration/ -t "primordial"          # single test by name subst
 
 Add an integration test when the thing you're verifying is a **contract between two subsystems owned by this repo** that can be exercised by reading a real file or running a real binary, but does **not** require a sandboxed `~/.claude/` install.
 
-- Adding a new MCP server → add a `registerMcp()` call in the relevant `src/components/*.ts` and update the install journal / uninstall allowlist in `src/utils/backup.ts` (`CODE_TOOLS_MANAGED_MCPS`). There is no static mcp.json to update.
+- Adding a new MCP server → add a `registerMcp()` call in the relevant `src/components/*.ts` and update the install journal / uninstall allowlist in `src/utils/backup.ts` (`YKA_CODE_MANAGED_MCPS`). There is no static mcp.json to update.
 - Adding a new hook in `configs/hooks/` → it is automatically swept by the shebang / `set -euo pipefail` tests; add a dedicated `describe` block in `hooks.test.ts` with fixtures if it has decision logic.
 - Adding a new CLI flag or subcommand to `bin/setup.ts` → add an assertion in `cli.test.ts` (`--help` output and, if stateless, a `--dry-run` invocation).
 - Changing the pinned deny-rule floor, model, or total config file count → update the constants in `config-validation.test.ts` in the same commit. These numbers are load-bearing guardrails, not arbitrary.

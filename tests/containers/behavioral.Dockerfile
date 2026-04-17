@@ -1,5 +1,5 @@
 # Behavioral test container - builds from base and installs full v12 system
-FROM code-tools-base
+FROM yka-code-base
 
 # Switch back to root for installation steps
 USER root

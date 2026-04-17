@@ -1,14 +1,14 @@
 {
-  "name": "@youssefKadaouiAbbassi/code-tools-setup",
+  "name": "@youssefKadaouiAbbassi/yka-code-setup",
   "version": "0.1.0",
   "description": "Interactive CLI installer for the Ultimate Claude Code System v12",
   "type": "module",
   "bin": {
-    "code-tools-setup": "./bin/setup.ts"
+    "yka-code-setup": "./bin/setup.ts"
   },
   "scripts": {
     "dev": "bun run bin/setup.ts",
-    "build": "bun build bin/setup.ts --compile --outfile dist/code-tools-setup",
+    "build": "bun build bin/setup.ts --compile --outfile dist/yka-code-setup",
     "build:npm": "bun build bin/setup.ts --outdir dist --target node",
     "start": "bun run bin/setup.ts",
     "test": "bun test",

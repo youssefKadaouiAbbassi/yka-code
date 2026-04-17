@@ -6,7 +6,7 @@ const SETUP_BIN = new URL("../../bin/setup.ts", import.meta.url).pathname;
 describe("CLI integration", () => {
   test("--help shows usage", async () => {
     const result = await $`bun run ${SETUP_BIN} --help`.text();
-    expect(result).toContain("code-tools-setup");
+    expect(result).toContain("yka-code-setup");
     expect(result).toContain("--non-interactive");
     expect(result).toContain("--dry-run");
     expect(result).toContain("setup");

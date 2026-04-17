@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Comprehensive test suite for the `@youssefKadaouiAbbassi/code-tools-setup` installer. Organized into six test types that layer from fast/pure (unit) to slow/realistic (e2e containers), plus a behavioral suite that prompts a live `claude -p` against the installed system and a bats verification suite used in CI.
+Comprehensive test suite for the `@youssefKadaouiAbbassi/yka-code-setup` installer. Organized into six test types that layer from fast/pure (unit) to slow/realistic (e2e containers), plus a behavioral suite that prompts a live `claude -p` against the installed system and a bats verification suite used in CI.
 
 Running `bun test` executes the full TypeScript suite (unit + integration + e2e + scenarios + behavioral — long-running ones are `skipIf`-gated). `bun run test:ci` runs the bats post-install assertions.
 
@@ -55,7 +55,7 @@ Each subdirectory has its own `AGENTS.md` with the detailed contract for that te
 
 ### Hard Rules
 
-1. **Never touch the real `~/.claude/`.** Use `mkdtemp(join(tmpdir(), "code-tools-..."))` and override `env.homeDir` / `env.claudeDir` on a `DetectedEnvironment` stub. See `tests/scenarios/primordial.test.ts` for the `mockEnv` pattern.
+1. **Never touch the real `~/.claude/`.** Use `mkdtemp(join(tmpdir(), "yka-code-..."))` and override `env.homeDir` / `env.claudeDir` on a `DetectedEnvironment` stub. See `tests/scenarios/primordial.test.ts` for the `mockEnv` pattern.
 2. **No real package-manager calls.** `tests/scenarios/primordial.test.ts` uses `mock.module("../../src/utils.js", ...)` to replace `installBinary` with an `already-installed` stub. Copy that pattern — never let `apt`/`brew`/`curl|sh` run from a test.
 3. **Idempotency is tested, not assumed.** Any installer spec must run the install twice and assert no duplicate shell-rc blocks, no duplicate `permissions.deny` entries, and preserved user-authored content (e.g., `tasks/lessons.md` must never be overwritten).
 4. **Gate slow/external tests with `describe.skipIf`.**
