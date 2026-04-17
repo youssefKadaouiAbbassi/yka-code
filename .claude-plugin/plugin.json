@@ -1,9 +1,24 @@
 {
   "name": "code-tools",
-  "description": "Ultimate Claude Code harness — 17 skills, 3 agents, /do command, 19 hooks",
+  "description": "Ultimate Claude Code harness — /do orchestrator, 17 skills (ship-feature, fix-bug, refactor-safely, security-audit, onboard-codebase + 12 more), 3 subagents, 19 hooks (pre-secrets-guard, pre-destructive-blocker, pre-pr-gate + 16 more), plugin-mode discovery and CLI installer.",
   "version": "0.1.0",
-  "author": { "name": "Youssef Kadaoui Abbassi" },
+  "author": {
+    "name": "Youssef Kadaoui Abbassi",
+    "url": "https://github.com/youssefKadaouiAbbassi"
+  },
   "homepage": "https://github.com/youssefKadaouiAbbassi/code-tools",
   "repository": "https://github.com/youssefKadaouiAbbassi/code-tools",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "orchestrator",
+    "skills",
+    "subagents",
+    "hooks",
+    "security-audit",
+    "ship-feature",
+    "fix-bug",
+    "refactor",
+    "installer"
+  ]
 }
