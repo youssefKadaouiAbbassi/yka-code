@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SessionStart hook: UCCS banner + autoskills auto-seed.
+# SessionStart hook: yka-code banner + autoskills auto-seed.
 # CC renders hook output as a visible panel only when emitted as JSON with
 # `systemMessage`. We build the banner in a buffer, JSON-escape it via python,
 # and emit {"systemMessage": "<banner>"}.
@@ -34,7 +34,7 @@ sessions_today() {
 }
 
 banner_body() {
-  printf '%s=== UCCS Session Start: %s ===%s\n' "$BOLD$CYAN" "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$RESET"
+  printf '%s=== yka-code Session Start: %s ===%s\n' "$BOLD$CYAN" "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$RESET"
 
   if git rev-parse --is-inside-work-tree &>/dev/null; then
     branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf 'unknown')"

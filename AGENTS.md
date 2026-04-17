@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Interactive CLI installer for the **Ultimate Claude Code System v12** — a 40-component Claude Code development environment. This repository is the **installer/setup tool**, not the installed system itself. It scaffolds a complete workstation (hooks, MCP servers, agents, sandbox, observability) onto any supported machine.
+Interactive CLI installer for the **yka-code** — a 40-component Claude Code development environment. This repository is the **installer/setup tool**, not the installed system itself. It scaffolds a complete workstation (hooks, MCP servers, agents, sandbox, observability) onto any supported machine.
 
 - **Package:** `@youssefKadaouiAbbassi/yka-code-setup`
 - **Runtime:** Bun (>= 1.2) with TypeScript

@@ -1,4 +1,4 @@
-# The Ultimate Claude Code System
+# The yka-code
 
 > 40 components. 7 MCP servers. 12 principles. Installer package version from `package.json`. All free except Claude Max $200/mo.
 > Validated by 10 independent architects, 9 unbiased researchers, 5 adversarial reviewers, 4 functionality verifiers, and verified from primary sources.

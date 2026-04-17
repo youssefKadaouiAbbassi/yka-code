@@ -1,7 +1,7 @@
 {
   "name": "@youssefKadaouiAbbassi/yka-code-setup",
   "version": "0.1.0",
-  "description": "Interactive CLI installer for the Ultimate Claude Code System v12",
+  "description": "Interactive CLI installer for yka-code",
   "type": "module",
   "bin": {
     "yka-code-setup": "./bin/setup.ts"

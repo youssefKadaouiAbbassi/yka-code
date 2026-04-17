@@ -6,7 +6,7 @@ const main = defineCommand({
     name: "yka-code-setup",
     version: "0.1.0",
     description:
-      "Interactive CLI installer for the Ultimate Claude Code System v12",
+      "Interactive CLI installer for the yka-code",
   },
   args: {
     "non-interactive": {

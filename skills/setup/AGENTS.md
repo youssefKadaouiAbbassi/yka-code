@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Defines the `/setup` slash command for Claude Code. This skill lets Claude Code itself invoke the **Ultimate Claude Code System v12** installer (this repository's CLI) as a native slash command, so a user inside Claude Code can run `/setup` instead of dropping to a shell and typing `bunx @youssefKadaouiAbbassi/yka-code-setup`.
+Defines the `/setup` slash command for Claude Code. This skill lets Claude Code itself invoke the **yka-code** installer (this repository's CLI) as a native slash command, so a user inside Claude Code can run `/setup` instead of dropping to a shell and typing `bunx @youssefKadaouiAbbassi/yka-code-setup`.
 
 Parent: [`../AGENTS.md`](../AGENTS.md) (the `skills/` tree — see root [`AGENTS.md`](../../AGENTS.md) for repo-wide context).
 

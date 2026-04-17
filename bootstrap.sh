@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "=== Ultimate Claude Code System v12 — Bootstrap ==="
+echo "=== yka-code — Bootstrap ==="
 echo ""
 
 # Detect OS and package manager

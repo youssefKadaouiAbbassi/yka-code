@@ -83,7 +83,7 @@ function handleCancel(): never {
 
 async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment, deployMode?: DeployMode): Promise<void> {
   clack.intro(
-    pc.bold(pc.cyan("Ultimate Claude Code System v12")) + pc.dim(" — Setup")
+    pc.bold(pc.cyan("yka-code")) + pc.dim(" — Setup")
   );
 
   // --- 1. Environment scan ---
@@ -514,7 +514,7 @@ async function recordJournal(env: DetectedEnvironment, tier: string | undefined)
 export default defineCommand({
   meta: {
     name: "setup",
-    description: "Install the Ultimate Claude Code System v12",
+    description: "Install the yka-code",
   },
   args: {
     "non-interactive": {

@@ -1,6 +1,6 @@
 ---
 name: setup
-description: [yka-code] Install or update the Ultimate Claude Code System. Use when the user asks to set up, install, bootstrap, or reinstall the yka-code harness (hooks, MCP servers, skills, plugins, shell rc).
+description: [yka-code] Install or update the yka-code. Use when the user asks to set up, install, bootstrap, or reinstall the yka-code harness (hooks, MCP servers, skills, plugins, shell rc).
 ---
 
 # Setup Skill

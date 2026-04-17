@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Installers for the 10 **category components** of the Ultimate Claude Code System v12. Each module is a self-contained `ComponentCategory` that exports (a) a category metadata object and (b) an `install(env, dryRun)` function. The `index.ts` barrel exposes two tier buckets — `RECOMMENDED_CATEGORIES` (8) and `OPTIONAL_CATEGORIES` (2) — plus the dynamic `installCategory()` dispatcher used by `src/commands/`.
+Installers for the 10 **category components** of the yka-code. Each module is a self-contained `ComponentCategory` that exports (a) a category metadata object and (b) an `install(env, dryRun)` function. The `index.ts` barrel exposes two tier buckets — `RECOMMENDED_CATEGORIES` (8) and `OPTIONAL_CATEGORIES` (2) — plus the dynamic `installCategory()` dispatcher used by `src/commands/`.
 
 Every category installer is expected to be **idempotent**, register MCP servers via `registerMcp()` (which verifies the registration landed), and respect `dryRun`.
 
