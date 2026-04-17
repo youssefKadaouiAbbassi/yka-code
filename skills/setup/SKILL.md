@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Install or update the Ultimate Claude Code System. Use when the user asks to set up, install, bootstrap, or reinstall the code-tools harness (hooks, MCP servers, skills, plugins, shell rc).
+description: [code-tools] Install or update the Ultimate Claude Code System. Use when the user asks to set up, install, bootstrap, or reinstall the code-tools harness (hooks, MCP servers, skills, plugins, shell rc).
 ---
 
 # Setup Skill

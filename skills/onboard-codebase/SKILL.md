@@ -1,6 +1,6 @@
 ---
 name: onboard-codebase
-description: Rapidly orient in an unfamiliar codebase. Use when the user opens a new repo for the first time, asks "how does this work", wants an architecture overview, or is about to make changes in a codebase they don't know. Chains Explore agent, serena symbol analysis, claude-mem history, and claude-md-management audit.
+description: [code-tools] Rapidly orient in an unfamiliar codebase. Use when the user opens a new repo for the first time, asks "how does this work", wants an architecture overview, or is about to make changes in a codebase they don't know. Chains Explore agent, serena symbol analysis, claude-mem history, and claude-md-management audit.
 ---
 
 # Onboard Codebase Workflow
