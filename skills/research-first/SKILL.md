@@ -21,7 +21,22 @@ Activate and **research before speaking** when the task or your own reasoning in
 - **Upstream repo state** — "is there a PR for X?", "did they fix Y?", "what's on main?"
 - **External SaaS integration** — Slack, Linear, Gmail, Notion, GitHub, Stripe, etc.
 
-## The research flow
+## Delegate to a subagent when research is heavy
+
+Main-chat context is finite and expensive. Research tends to pull in long documents, multi-page search results, and full source files that balloon the transcript. Before doing research inline, check whether it should be a subagent call:
+
+| Shape of research | Do it in main chat | Delegate to subagent (`Agent()` / `general-purpose`) |
+|---|---|---|
+| Single docfork/deepwiki lookup with a known answer shape | ✅ | — |
+| Single `gh api` call for a specific PR/issue | ✅ | — |
+| Reading 1-2 files from a known repo path | ✅ | — |
+| Comparing patterns across ≥3 repos / workflows / codebases | — | ✅ |
+| ≥3 web searches needed to triangulate the answer | — | ✅ |
+| Any research whose *raw* output will exceed ~2000 tokens (long API docs, multi-file source reads, changelogs) | — | ✅ |
+| "What's the state of the art / industry standard for X?" surveys | — | ✅ |
+| Spec extraction: read SPEC → produce a blueprint | — | ✅ |
+
+When you delegate: give the subagent the problem, the list of sources to check, the fields to extract, and a word budget for the report. You stay focused on the task; the subagent burns its own context on retrieval.
 
 ### Step 1 — Pin the date/version
 

@@ -42,6 +42,8 @@ Local tool still first when a 1-line CLI does it (`Read`, `Grep`, `gh`, `bun`, `
 
 **Verification loop rule**: for every library claim (API shape, flag, version behavior) Claude states, either (a) cite the docfork/deepwiki result inline OR (b) note "unverified, training-cutoff" and call the MCP before finalizing. Unsourced lib claims = lint failure.
 
+**Delegation rule**: when research will pull >2000 tokens of raw content (industry surveys, multi-repo comparisons, long API docs, ≥3 web searches), delegate to a subagent (`Agent(subagent_type: "general-purpose", ...)`) with a word-budgeted report. Main chat context is finite; retrieval goes to throwaway contexts. Single lookups with a known answer shape stay inline.
+
 **Date-pinning rule (non-negotiable)**: every version-specific claim must resolve a reference date:
 
 - If the user specified a date, version, or timeframe → pin the MCP query to that reference. `github` MCP with `ref=<tag|sha>` for repo state. `docfork:search_docs` with version-qualified query (`react@18.3 useEffect`). `deepwiki` against a revision if supported.

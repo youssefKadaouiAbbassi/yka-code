@@ -42,7 +42,10 @@
     "agents/",
     "skills/",
     "commands/",
-    ".claude-plugin/"
+    "hooks/",
+    ".claude-plugin/",
+    "LICENSE",
+    "README.md"
   ],
   "keywords": [
     "claude-code",
