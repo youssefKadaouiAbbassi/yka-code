@@ -7,29 +7,27 @@ description: [yka-code] Front-door entry skill for ANY coding task. Use whenever
 
 Single entry point for coding work. Figures out what the user wants, applies the principles, routes to the right workflow, and keeps the full toolkit visible so nothing gets forgotten.
 
-## Principles (always applied)
+## Phase 0 — INVOKE the three base skills as tool calls (non-negotiable)
 
-Load all three skills at Phase 0 of every coding task. They're complementary:
+Before Phase 1 classification, before any `Read`/`Grep`/`Glob`/`Bash`/`Edit`/`Write`/`WebSearch`/`WebFetch`/MCP call, **invoke these three skills via the `Skill` tool**:
 
-- `Skill(skill: "karpathy-guidelines")` — **behavioral** principles (how to *approach* the work):
-  1. Think Before Coding — surface assumptions and tradeoffs explicitly
-  2. Simplicity First — minimal code, no speculative abstractions
-  3. Surgical Changes — only touch what the task requires
-  4. Goal-Driven Execution — define the verifiable success criterion up front
+```
+Skill(skill: "karpathy-guidelines")
+Skill(skill: "coding-style")
+Skill(skill: "research-first")
+```
 
-- `Skill(skill: "coding-style")` — **style** rules (how the *code* should look):
-  1. No comments unless critical (WHY only; never WHAT, never history)
-  2. Clean + optimized (no dead code, no speculative abstractions, no stale imports)
-  3. Self-documenting names (full words, verbs for functions, nouns for data)
-  4. Smallest surface (one function one concern, rule-of-3 for extraction)
-  5. No dead defense (no try/catch for impossible cases, let errors bubble)
+Make all three calls in one message (parallel). Do not paraphrase or interpret their bodies inline — the Skill tool is what loads their full content into the turn and activates their rules. Reading the skill markdown yourself is a lint failure: it skips activation and wastes tokens.
 
-- `Skill(skill: "research-first")` — **research** discipline (how to *verify* library claims):
-  1. Any library / framework / API mention → MCP before speaking (docfork, deepwiki, github)
-  2. Pin the date or version — user's if specified, today's (`date -I`) otherwise
-  3. Cite inline next to each version-specific claim
-  4. "Unverified, training-cutoff" stamp when MCPs miss — never silently assert
-  5. Post-hoc audit via `stop-research-check.sh` hook catches slip-ups
+The three skills are complementary:
+
+- **`karpathy-guidelines`** — behavioral (Think Before Coding / Simplicity First / Surgical Changes / Goal-Driven Execution)
+- **`coding-style`** — surface style (No comments / Clean + optimized / Self-documenting names / Smallest surface / No dead defense)
+- **`research-first`** — research discipline (MCP-first for library claims, date-pin or version-pin, cite inline, never silently assert, delegate heavy research to a subagent)
+
+If you notice partway through a turn that you didn't invoke them at Phase 0, invoke them now, then continue. Don't "catch up by reading" — the tool call is the activation.
+
+The `pre-research-check.sh` hook (PreToolUse on WebSearch / WebFetch / mcp__docfork__* / mcp__deepwiki__* / mcp__github__*) emits an advisory to stderr if a research tool fires before `Skill("research-first")` has been invoked this turn. Treat the advisory as a correction prompt — invoke the skill, then retry.
 
 ## Phase 1 — Classify the task (fast)
 

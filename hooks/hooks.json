@@ -3,7 +3,8 @@
     "PreToolUse": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/pre-secrets-guard.sh" }] },
       { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/pre-destructive-blocker.sh" }] },
-      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/pre-pr-gate.sh" }] }
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/pre-pr-gate.sh" }] },
+      { "matcher": "WebSearch|WebFetch|mcp__docfork__.*|mcp__deepwiki__.*|mcp__github__.*", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/pre-research-check.sh" }] }
     ],
     "PostToolUse": [
       { "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/post-lint-gate.sh" }] },

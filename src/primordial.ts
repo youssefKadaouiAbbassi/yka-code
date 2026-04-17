@@ -322,6 +322,12 @@ async function deployHooks(env: DetectedEnvironment, dryRun: boolean, deployMode
     if (hookFilenames.has("pre-pr-gate.sh")) {
       preHooks.push({ matcher: "Bash", hooks: [cmd("pre-pr-gate.sh")] });
     }
+    if (hookFilenames.has("pre-research-check.sh")) {
+      preHooks.push({
+        matcher: "WebSearch|WebFetch|mcp__docfork__.*|mcp__deepwiki__.*|mcp__github__.*",
+        hooks: [cmd("pre-research-check.sh")],
+      });
+    }
     if (preHooks.length > 0) {
       hooksConfig.PreToolUse = preHooks;
     }
