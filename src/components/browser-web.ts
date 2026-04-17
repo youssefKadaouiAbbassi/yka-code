@@ -182,6 +182,7 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
 
   // --- Docfork MCP ---
   try {
+    const key = process.env.DOCFORK_API_KEY ?? "";
     if (dryRun) {
       log.info("[dry-run] Would register Docfork MCP config (requires DOCFORK_API_KEY)");
       results.push({
@@ -190,18 +191,25 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
         message: "[dry-run] Would register Docfork MCP server",
         verifyPassed: false,
       });
+    } else if (!key) {
+      results.push({
+        component: "Docfork",
+        status: "skipped",
+        message: "DOCFORK_API_KEY not set — add to ~/.config/yka-code/secrets.env and re-run",
+        verifyPassed: false,
+      });
     } else {
       await registerMcp("docfork", {
         transport: "stdio",
         command: "npx",
         args: ["-y", "docfork"],
-        env: { DOCFORK_API_KEY: process.env.DOCFORK_API_KEY ?? "" },
+        env: { DOCFORK_API_KEY: key },
       });
-      log.success("Docfork MCP server registered (set DOCFORK_API_KEY in your environment)");
+      log.success(`Docfork MCP server registered (DOCFORK_API_KEY found, ${key.length}-char key)`);
       results.push({
         component: "Docfork",
         status: "installed",
-        message: "Docfork MCP config registered — set DOCFORK_API_KEY",
+        message: `Docfork MCP registered with existing DOCFORK_API_KEY (${key.length} chars)`,
         verifyPassed: true,
       });
     }
