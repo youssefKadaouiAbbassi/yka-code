@@ -32,7 +32,7 @@ export const workstationCategory: ComponentCategory = {
       id: 37,
       name: "tmux",
       displayName: "tmux",
-      description: "Terminal multiplexer (verify only — installed by primordial)",
+      description: "Terminal multiplexer (verify only — installed by core)",
       tier: "recommended",
       category: "workstation",
       packages: [
@@ -188,7 +188,7 @@ export async function install(
     });
   }
 
-  // --- tmux (VERIFY ONLY — installed by primordial) ---
+  // --- tmux (VERIFY ONLY — installed by core) ---
   try {
     const installed = commandExists("tmux");
     if (installed) {
@@ -206,11 +206,11 @@ export async function install(
         verifyPassed: true,
       });
     } else {
-      log.warn("tmux not found — should have been installed by primordial layer");
+      log.warn("tmux not found — should have been installed by core layer");
       results.push({
         component: "tmux",
         status: "skipped",
-        message: "tmux not found — install via your package manager (primordial responsibility)",
+        message: "tmux not found — install via your package manager (core responsibility)",
         verifyPassed: false,
       });
     }

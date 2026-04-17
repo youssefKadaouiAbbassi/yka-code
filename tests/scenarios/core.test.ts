@@ -54,7 +54,7 @@ mock.module("../../src/utils.js", () => {
 });
 
 // Import AFTER mock.module so the mock is in place
-const { installPrimordial } = await import("../../src/primordial.js");
+const { installCore } = await import("../../src/core.js");
 const { listBackups } = await import("../../src/backup.js");
 
 let tmpDir: string;
@@ -76,7 +76,7 @@ function mockEnv(tempDir: string): DetectedEnvironment {
 }
 
 beforeEach(async () => {
-  tmpDir = await mkdtemp(join(tmpdir(), "yka-code-primordial-"));
+  tmpDir = await mkdtemp(join(tmpdir(), "yka-code-core-"));
   await writeFile(join(tmpDir, ".zshrc"), "# existing rc\n");
 });
 
@@ -87,10 +87,10 @@ afterEach(async () => {
   }
 });
 
-describe("installPrimordial", () => {
+describe("installCore", () => {
   test("dry-run produces no files in ~/.claude", async () => {
     const env = mockEnv(tmpDir);
-    const results = await installPrimordial(env, true);
+    const results = await installCore(env, true);
 
     // ~/.claude/settings.json should NOT have been created
     const settingsExists = await Bun.file(join(tmpDir, ".claude", "settings.json")).exists();
@@ -104,7 +104,7 @@ describe("installPrimordial", () => {
 
   test("settings.json deployed with 40+ deny rules", async () => {
     const env = mockEnv(tmpDir);
-    await installPrimordial(env, false);
+    await installCore(env, false);
 
     const settingsPath = join(tmpDir, ".claude", "settings.json");
     expect(await Bun.file(settingsPath).exists()).toBe(true);
@@ -116,7 +116,7 @@ describe("installPrimordial", () => {
 
   test("CLAUDE.md deployed and under 120 lines", async () => {
     const env = mockEnv(tmpDir);
-    await installPrimordial(env, false);
+    await installCore(env, false);
 
     const claudeMdPath = join(tmpDir, ".claude", "CLAUDE.md");
     expect(await Bun.file(claudeMdPath).exists()).toBe(true);
@@ -128,7 +128,7 @@ describe("installPrimordial", () => {
 
   test("hooks deployed and executable", async () => {
     const env = mockEnv(tmpDir);
-    await installPrimordial(env, false);
+    await installCore(env, false);
 
     const hooksDir = join(tmpDir, ".claude", "hooks");
     const expectedHooks = [
@@ -152,7 +152,7 @@ describe("installPrimordial", () => {
 
   test("shell RC has marker", async () => {
     const env = mockEnv(tmpDir);
-    await installPrimordial(env, false);
+    await installCore(env, false);
 
     const rcContent = await Bun.file(join(tmpDir, ".zshrc")).text();
     expect(rcContent).toContain("# yka-code-managed");
@@ -162,7 +162,7 @@ describe("installPrimordial", () => {
     const env = mockEnv(tmpDir);
 
     // First run creates tasks/lessons.md relative to process.cwd()
-    await installPrimordial(env, false);
+    await installCore(env, false);
 
     const lessonsPath = join(process.cwd(), "tasks", "lessons.md");
     const lessonsExists = await Bun.file(lessonsPath).exists();
@@ -172,13 +172,13 @@ describe("installPrimordial", () => {
       await Bun.write(lessonsPath, "MY CUSTOM CONTENT\n");
 
       // Second run must NOT overwrite it
-      await installPrimordial(env, false);
+      await installCore(env, false);
 
       const afterContent = await Bun.file(lessonsPath).text();
       expect(afterContent).toContain("MY CUSTOM CONTENT");
     } else {
       // Cannot write to cwd (e.g., permission issue); just verify second-run result
-      const results = await installPrimordial(env, false);
+      const results = await installCore(env, false);
       const lessonsResult = results.find((r) => r.component === "lessons");
       expect(lessonsResult).toBeDefined();
     }
@@ -194,7 +194,7 @@ describe("installPrimordial", () => {
       JSON.stringify({ existing: true }) + "\n"
     );
 
-    await installPrimordial(env, false);
+    await installCore(env, false);
 
     // backup.ts resolves BACKUP_BASE from Bun.env.HOME at module load, so backups
     // land in the real ~/.claude-backup. Verify at least one manifest exists.
@@ -211,8 +211,8 @@ describe("installPrimordial", () => {
   test("idempotent — no duplicate deny rules after two runs", async () => {
     const env = mockEnv(tmpDir);
 
-    await installPrimordial(env, false);
-    await installPrimordial(env, false);
+    await installCore(env, false);
+    await installCore(env, false);
 
     const settingsPath = join(tmpDir, ".claude", "settings.json");
     const settings = await Bun.file(settingsPath).json() as { permissions?: { deny?: string[] } };
@@ -224,7 +224,7 @@ describe("installPrimordial", () => {
 
   test("returns at least 12 results", async () => {
     const env = mockEnv(tmpDir);
-    const results = await installPrimordial(env, false);
+    const results = await installCore(env, false);
     expect(results.length).toBeGreaterThanOrEqual(12);
   });
 });

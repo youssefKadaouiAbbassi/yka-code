@@ -19,7 +19,7 @@ GitHub Actions workflow definitions that drive CI/CD for `yka-code`. Every push 
 | `unit` | `ubuntu-latest` | every push/PR | `bun install` → `bun test tests/unit` → `bun test tests/integration` |
 | `lint-hooks` | `ubuntu-latest` | every push/PR | `shellcheck configs/hooks/*.sh configs/project-claude/hooks/*.sh bootstrap.sh` |
 | `e2e-ubuntu` | `ubuntu-latest` | after `unit` | `bun test tests/e2e` (15 min timeout) |
-| `bats-ubuntu` | `ubuntu-latest` | after `unit` | Run installer at `--tier primordial`, then `bats tests/ci/verify.bats` |
+| `bats-ubuntu` | `ubuntu-latest` | after `unit` | Run installer at `--tier core`, then `bats tests/ci/verify.bats` |
 | `bats-macos` | `macos-14` | master branch only, after `unit` | Same as `bats-ubuntu` but via Homebrew |
 
 Triggers: `push` to `master`, `pull_request` targeting `master`. macOS job is gated on `github.ref == 'refs/heads/master'` to save minutes on PRs.
@@ -32,8 +32,8 @@ Triggers: `push` to `master`, `pull_request` targeting `master`. macOS job is ga
 - **Keep jobs reproducible.** Use `bun install` (respects `bun.lock`), never `bun install --no-save`. Pin third-party actions by major version tag (`@v4`, `@v2`).
 - **Respect job dependencies.** `e2e-ubuntu` and `bats-*` jobs have `needs: [unit]` so the cheap suite gates the expensive ones. Preserve that ordering when adding jobs.
 - **Shellcheck is a blocking gate.** Any new `.sh` under `configs/hooks/`, `configs/project-claude/hooks/`, or at repo root (like `bootstrap.sh`) must be added to the `lint-hooks` job and pass cleanly. See parent `AGENTS.md` Hard Rule #4.
-- **BATS verification is the truth source for installer correctness.** Every new primordial component must have a matching assertion in `tests/ci/verify.bats` — both BATS jobs run it.
-- **Installer runs non-interactively in CI.** Use `--non-interactive --tier primordial` (or another explicit tier). Never rely on prompts.
+- **BATS verification is the truth source for installer correctness.** Every new core component must have a matching assertion in `tests/ci/verify.bats` — both BATS jobs run it.
+- **Installer runs non-interactively in CI.** Use `--non-interactive --tier core` (or another explicit tier). Never rely on prompts.
 - **OS matrix is intentional.** Ubuntu covers apt paths; macOS-14 covers brew paths. Do not drop macOS without updating `installBinary()` coverage in `src/utils.ts`.
 
 ### Adding a New Workflow
@@ -91,7 +91,7 @@ A publish/release workflow is **not yet present**. When adding one:
 | `bun test tests/unit` | `unit` |
 | `bun test tests/integration` | `unit` |
 | `bun test tests/e2e` | `e2e-ubuntu` |
-| `bun run bin/setup.ts --non-interactive --tier primordial` | `bats-ubuntu`, `bats-macos` |
+| `bun run bin/setup.ts --non-interactive --tier core` | `bats-ubuntu`, `bats-macos` |
 | `bats tests/ci/verify.bats` | `bats-ubuntu`, `bats-macos` |
 
 <!-- MANUAL: -->

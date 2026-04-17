@@ -4,9 +4,9 @@
 
 ## Purpose
 
-Source-of-truth **configuration templates** deployed by the installer (`src/primordial.ts`) onto a target machine. Every file here is copied or merged into the user's `~/.claude/` (global scope) or the target project's `.claude/` (project scope), or into shell/terminal config paths (`~/.tmux.conf`, `~/.config/starship.toml`).
+Source-of-truth **configuration templates** deployed by the installer (`src/core.ts`) onto a target machine. Every file here is copied or merged into the user's `~/.claude/` (global scope) or the target project's `.claude/` (project scope), or into shell/terminal config paths (`~/.tmux.conf`, `~/.config/starship.toml`).
 
-This directory is **the primordial tier** — files here install silently with no prompt (see root `AGENTS.md` tier table). They are backed up then overridden at `~/.claude-backup/{timestamp}/`.
+This directory is **the core tier** — files here install silently with no prompt (see root `AGENTS.md` tier table). They are backed up then overridden at `~/.claude-backup/{timestamp}/`.
 
 ## Key Files
 
@@ -22,7 +22,7 @@ This directory is **the primordial tier** — files here install silently with n
 | `home-claude/` | `~/.claude/` | User-scope Claude Code config — global defaults for all projects |
 | `project-claude/` | `<project>/.claude/` | Project-scope Claude Code config — per-repo overrides and project hooks |
 | `hooks/` | `~/.claude/hooks/` | User-scope hook scripts (PreToolUse, PostToolUse, PreCompact, PostCompact, StopFailure, PermissionDenied, FileChanged, CwdChanged, Elicitation, SessionStart, SessionEnd, Stop) referenced by `home-claude/settings.json` |
-| `plugins/yka-code-health/` | manual `claude plugin install <path>` | Reference implementation of the Claude Code `monitors` manifest key (v2.1.105+). One monitor — `primordial-install-health` — that notifies when hooks drift, `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` is unset, or the Serena MCP registration is missing. Not auto-installed; opt-in. |
+| `plugins/yka-code-health/` | manual `claude plugin install <path>` | Reference implementation of the Claude Code `monitors` manifest key (v2.1.105+). One monitor — `core-install-health` — that notifies when hooks drift, `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` is unset, or the Serena MCP registration is missing. Not auto-installed; opt-in. |
 
 ### `home-claude/` — used when installer runs with `--global` (default)
 
@@ -48,7 +48,7 @@ Local installs skip: skills, agents, commands, shell rc edits, global binary ins
 
 ### `hooks/` (user-scope)
 
-Shell scripts wired into user-scope `settings.json` by `installPrimordial` under `--global`. Each hook reads Claude Code hook JSON from stdin. PreToolUse hooks use the current `hookSpecificOutput.permissionDecision` schema to block; advisory hooks emit only to stderr.
+Shell scripts wired into user-scope `settings.json` by `installCore` under `--global`. Each hook reads Claude Code hook JSON from stdin. PreToolUse hooks use the current `hookSpecificOutput.permissionDecision` schema to block; advisory hooks emit only to stderr.
 
 | Hook | Event | Role | Blocking? |
 |------|-------|------|-----------|
@@ -68,7 +68,7 @@ We deliberately ship no dedicated observability category. The behavioral surface
 - **`session-report` plugin** (installed via `cc-plugins.ts` from `anthropics/claude-plugins-official`): Skill-activated; parses `~/.claude/projects/**/*.jsonl` and generates a self-contained HTML report of tokens, cache efficiency, subagents, skills, top prompts. Zero services.
 - **`claude-hud`** (installed via `memory-context.ts`): statusline reads `rate_limits` + `cost.total_cost_usd` from CC stdin; always-on limit bar.
 - **`claude-mem`** (installed via `memory-context.ts`): hybrid SQLite + Chroma store of every tool call; searchable via MCP; web viewer at `localhost:37777`; `claude-mem:timeline-report` skill for narrative history.
-- **OTEL export** (primordial sets `CLAUDE_CODE_ENABLE_TELEMETRY=1` + `OTEL_EXPORTER_OTLP_ENDPOINT`-ready): user wires up `anthropics/claude-code-monitoring-guide`'s docker-compose + Grafana dashboards (25052 / 24993 on grafana.com) when they want persistent multi-session analytics.
+- **OTEL export** (core sets `CLAUDE_CODE_ENABLE_TELEMETRY=1` + `OTEL_EXPORTER_OTLP_ENDPOINT`-ready): user wires up `anthropics/claude-code-monitoring-guide`'s docker-compose + Grafana dashboards (25052 / 24993 on grafana.com) when they want persistent multi-session analytics.
 - **Multi-account OAuth rotation**: genuinely unsolved by any Anthropic-sanctioned tool. Community options (`tombii/better-ccflare`, `CaddyGlow/ccproxy-api`) exist but are single-maintainer — we do not install them; users opt in via `npm install -g <pkg>` after evaluating trust themselves.
 
 ### `project-claude/hooks/` (project-scope, deployed under `--local`)
@@ -121,7 +121,7 @@ Hooks require these binaries on the target machine — installed by `bootstrap.s
 
 ### Consumed By
 
-- **`src/primordial.ts`** — copies the scope-appropriate template tree (`home-claude/` for `--global`, `project-claude/` for `--local`). Branching lives in `isLocalScope(env)` / `templateDir(env)`.
+- **`src/core.ts`** — copies the scope-appropriate template tree (`home-claude/` for `--global`, `project-claude/` for `--local`). Branching lives in `isLocalScope(env)` / `templateDir(env)`.
 - **`src/verify.ts`** — post-install verification checks presence and permissions of deployed files
 - **`src/backup.ts`** — backs up any existing target files before overwrite
 - Template path resolution uses `getConfigsDir()` which returns `join(import.meta.dir, "..", "configs")`.

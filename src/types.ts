@@ -47,7 +47,7 @@ export interface InstallResult {
 }
 
 // Component definition
-export type Tier = 'primordial' | 'recommended' | 'optional';
+export type Tier = 'core' | 'recommended' | 'optional';
 
 export interface Component {
   id: number;

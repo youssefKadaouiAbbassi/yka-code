@@ -28,7 +28,7 @@ bunx @youssefKadaouiAbbassi/yka-code-setup --dry-run
 ### Install a Specific Tier
 
 ```bash
-bunx @youssefKadaouiAbbassi/yka-code-setup --tier primordial    # core only
+bunx @youssefKadaouiAbbassi/yka-code-setup --tier core    # core only
 bunx @youssefKadaouiAbbassi/yka-code-setup --tier recommended   # core + recommended
 bunx @youssefKadaouiAbbassi/yka-code-setup --tier all           # everything
 ```

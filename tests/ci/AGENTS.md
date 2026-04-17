@@ -14,7 +14,7 @@ These tests are the authoritative post-install contract. They run in GitHub Acti
 
 | File | Description |
 |------|-------------|
-| `verify.bats` | 10 Bats assertions validating the primordial install: `jq` present, `~/.claude/settings.json` exists with >= 40 deny rules, `~/.claude/CLAUDE.md` present, 6 hook scripts executable (`pre-destructive-blocker`, `pre-secrets-guard`, `post-lint-gate`, `session-start`, `session-end`, `stop-summary`), `~/.tmux.conf` deployed, `~/.config/starship.toml` deployed, shell rc contains `# yka-code-managed` marker, `~/.claude-backup/` exists, backup has `manifest.json` |
+| `verify.bats` | 10 Bats assertions validating the core install: `jq` present, `~/.claude/settings.json` exists with >= 40 deny rules, `~/.claude/CLAUDE.md` present, 6 hook scripts executable (`pre-destructive-blocker`, `pre-secrets-guard`, `post-lint-gate`, `session-start`, `session-end`, `stop-summary`), `~/.tmux.conf` deployed, `~/.config/starship.toml` deployed, shell rc contains `# yka-code-managed` marker, `~/.claude-backup/` exists, backup has `manifest.json` |
 
 ## Running
 
@@ -38,7 +38,7 @@ brew install bats-core jq
 
 CI workflow (`.github/workflows/test.yml`) runs:
 
-1. The installer non-interactively (`--non-interactive --tier primordial`).
+1. The installer non-interactively (`--non-interactive --tier core`).
 2. `bats tests/ci/verify.bats` against the resulting `~/.claude/` state.
 
 ## For AI Agents
@@ -47,7 +47,7 @@ CI workflow (`.github/workflows/test.yml`) runs:
 
 Add a new `@test` block whenever you:
 
-1. **Add a primordial component** — every file the installer guarantees to deploy must have a corresponding bats assertion.
+1. **Add a core component** — every file the installer guarantees to deploy must have a corresponding bats assertion.
 2. **Add a new hook script** — extend the loop in the "all 6 hooks are executable" test (and rename the test to reflect the new count).
 3. **Change the `settings.json` deny-rule floor** — update the `[ "$count" -ge 40 ]` threshold.
 4. **Add a new shell rc marker or config file** — add an explicit existence check.
@@ -80,12 +80,12 @@ Per Principle 7: author bats changes here, then hand the approval pass to `code-
 
 | Path | Created by |
 |------|-----------|
-| `~/.claude/settings.json` | `src/primordial.ts` |
-| `~/.claude/CLAUDE.md` | `src/primordial.ts` |
-| `~/.claude/hooks/*.sh` | `src/primordial.ts` (6 scripts from `configs/hooks/`) |
-| `~/.tmux.conf` | `src/primordial.ts` |
-| `~/.config/starship.toml` | `src/primordial.ts` |
-| `~/.zshrc` or `~/.bashrc` (marker line) | `src/primordial.ts` |
+| `~/.claude/settings.json` | `src/core.ts` |
+| `~/.claude/CLAUDE.md` | `src/core.ts` |
+| `~/.claude/hooks/*.sh` | `src/core.ts` (6 scripts from `configs/hooks/`) |
+| `~/.tmux.conf` | `src/core.ts` |
+| `~/.config/starship.toml` | `src/core.ts` |
+| `~/.zshrc` or `~/.bashrc` (marker line) | `src/core.ts` |
 | `~/.claude-backup/{timestamp}/manifest.json` | `src/backup.ts` |
 
 <!-- MANUAL: -->

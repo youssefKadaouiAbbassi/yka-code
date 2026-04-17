@@ -39,7 +39,7 @@ Scope covered today: `src/utils.ts`, `src/detect.ts`, `src/backup.ts`, `src/veri
 1. **Temp-dir only.** Every spec that writes to disk must use `mkdtemp(join(tmpdir(), "yka-code-..."))` and `rm(tmpDir, { recursive: true, force: true })` in `afterEach`. Copy the `beforeEach`/`afterEach` block from `utils.test.ts`.
 2. **`backup.ts` is the one exception.** `src/backup.ts` captures `BACKUP_BASE = join(Bun.env.HOME, ".claude-backup")` at module-load time, so `backup.test.ts` lands real backups in the real `~/.claude-backup/`. Push each created path onto `createdBackupDirs` and clean it in `afterEach` — see `backup.test.ts` lines 14-27 for the pattern.
 3. **Mock `DetectedEnvironment` with a helper.** Use a local `makeEnv()` (see `utils.test.ts` line 27 and `verify.test.ts` line 18) that builds a minimal `DetectedEnvironment` pointing at `tmpDir`. Do not call `detectEnvironment()` from unit tests outside `detect.test.ts`.
-4. **No network, no containers, no real package managers.** Those belong in `tests/integration/`, `tests/e2e/`, or `tests/scenarios/`. If a unit test needs `installBinary`, mock the module (example: `tests/scenarios/primordial.test.ts`).
+4. **No network, no containers, no real package managers.** Those belong in `tests/integration/`, `tests/e2e/`, or `tests/scenarios/`. If a unit test needs `installBinary`, mock the module (example: `tests/scenarios/core.test.ts`).
 5. **No `claude` CLI calls.** Behavioral prompts against live Claude live in `tests/behavioral/` and are gated by `RUN_BEHAVIORAL_TESTS=true`.
 6. **Verify idempotency where the unit supports it.** `appendToShellRc` is called twice in one test to assert the `# yka-code-managed` marker appears exactly once — mirror that pattern for any new idempotent helper.
 7. **Import from `.js` paths.** The project uses ESNext modules with `.js` extensions in import specifiers even though sources are `.ts` (see any existing test: `from "../../src/utils.js"`).
@@ -66,6 +66,6 @@ Unit tests deliberately have **no external dependencies**. They do not require `
 
 ### Mocking
 
-This directory does not use `mock.module` today — all four existing specs are pure against real module code. When mocking becomes necessary (e.g. a function that shells out unconditionally), follow the `mock.module("../../src/utils.js", ...)` pattern used in `tests/scenarios/primordial.test.ts` rather than inventing a new approach.
+This directory does not use `mock.module` today — all four existing specs are pure against real module code. When mocking becomes necessary (e.g. a function that shells out unconditionally), follow the `mock.module("../../src/utils.js", ...)` pattern used in `tests/scenarios/core.test.ts` rather than inventing a new approach.
 
 <!-- MANUAL: -->

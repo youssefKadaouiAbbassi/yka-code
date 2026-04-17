@@ -662,7 +662,7 @@ async function createLessons(_env: DetectedEnvironment, dryRun: boolean): Promis
 
 // --- Main export ---
 
-export async function installPrimordial(
+export async function installCore(
   env: DetectedEnvironment,
   dryRun: boolean,
   deployMode?: DeployMode,
@@ -702,7 +702,7 @@ export async function installPrimordial(
     results.push(await createLessons(env, dryRun));
     return results;
   } catch (error) {
-    log.error("Primordial install failed, restoring backup...");
+    log.error("Core install failed, restoring backup...");
     await restoreFromPartialManifest(backup);
     throw error;
   }

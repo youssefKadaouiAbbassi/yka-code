@@ -15,7 +15,7 @@ const main = defineCommand({
     },
     tier: {
       type: "string",
-      description: "Install tier: primordial, recommended, all",
+      description: "Install tier: core, recommended, all",
     },
     "dry-run": {
       type: "boolean",

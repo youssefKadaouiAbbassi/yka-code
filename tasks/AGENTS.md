@@ -12,7 +12,7 @@ Parent: [`../AGENTS.md`](../AGENTS.md)
 
 | File | Description |
 |------|-------------|
-| `lessons.md` | Corrections log — every time a correction is made to agent output, the lesson belongs here so it is never repeated. Protected: `primordial.ts` **never overwrites** this file once it exists. |
+| `lessons.md` | Corrections log — every time a correction is made to agent output, the lesson belongs here so it is never repeated. Protected: `core.ts` **never overwrites** this file once it exists. |
 
 ## For AI Agents
 
@@ -26,23 +26,23 @@ Parent: [`../AGENTS.md`](../AGENTS.md)
 - **Append corrections, never edit history.** When the user corrects output, append a new entry rather than rewriting prior lessons.
 - **One lesson per correction.** Keep entries short, concrete, and actionable — a rule a future agent can follow without re-deriving context.
 - **Do not duplicate.** Grep before appending; if the lesson already exists, skip.
-- **Never overwrite from code.** The installer's `primordial.ts` deploys a seed `lessons.md` only when absent. Agent edits to this file must preserve existing content.
+- **Never overwrite from code.** The installer's `core.ts` deploys a seed `lessons.md` only when absent. Agent edits to this file must preserve existing content.
 
 ### Scope
 
 - This directory is for **corrections log** only. Do not add roadmaps, backlogs, or design docs here — those belong in `IMPLEMENTATION_PLAN.md` (build spec), `.omc/plans/` (transient plans), or `README.md` (architecture).
-- Do not create new files in `tasks/` without updating this `AGENTS.md` and confirming the installer's primordial logic still matches.
+- Do not create new files in `tasks/` without updating this `AGENTS.md` and confirming the installer's core logic still matches.
 
 ### Installer Contract
 
-The installer treats `tasks/lessons.md` as a **primordial tier** artifact deployed into every target project:
+The installer treats `tasks/lessons.md` as a **core tier** artifact deployed into every target project:
 
 - Location in installed systems: `<project>/tasks/lessons.md`
 - Deploy source: `configs/project-claude/tasks/lessons.md` (verify with `bun run dev --dry-run`)
 - Overwrite policy: **never** — if the file exists at the target, the installer skips it
 - Backup policy: not backed up (append-only; backup would defeat the preservation guarantee)
 
-Any change to the file's role or overwrite semantics must be reflected in `src/primordial.ts`, `src/verify.ts`, and the `IMPLEMENTATION_PLAN.md` primordial tier definition.
+Any change to the file's role or overwrite semantics must be reflected in `src/core.ts`, `src/verify.ts`, and the `IMPLEMENTATION_PLAN.md` core tier definition.
 
 ## Dependencies
 

@@ -37,13 +37,13 @@ describe("CLI flows", () => {
     expect(output).toContain("[dry-run]");
   });
 
-  test("--tier primordial --dry-run exits 0 and mentions primordial actions", () => {
-    const { exitCode, stdout, stderr } = runCli("--tier", "primordial", "--dry-run");
+  test("--tier core --dry-run exits 0 and mentions core actions", () => {
+    const { exitCode, stdout, stderr } = runCli("--tier", "core", "--dry-run");
     const output = stdout + stderr;
 
     expect(exitCode).toBe(0);
-    // primordial tier logs "Primordial tier complete." or dry-run messages
-    expect(output.toLowerCase()).toMatch(/primordial|dry-run|would/i);
+    // core tier logs "Core tier complete." or dry-run messages
+    expect(output.toLowerCase()).toMatch(/core|dry-run|would/i);
   });
 
   test("--tier all --dry-run exits 0 and mentions category installs", () => {

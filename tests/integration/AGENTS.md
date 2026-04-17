@@ -16,7 +16,7 @@ Three contracts are covered:
 
 | File | What it verifies |
 |------|------------------|
-| `cli.test.ts` | Executes `bun run bin/setup.ts` with `--help`, `--non-interactive --dry-run`, `--tier primordial --dry-run`, and the `status` / `restore` subcommands. Asserts output markers and exit codes. |
+| `cli.test.ts` | Executes `bun run bin/setup.ts` with `--help`, `--non-interactive --dry-run`, `--tier core --dry-run`, and the `status` / `restore` subcommands. Asserts output markers and exit codes. |
 | `config-validation.test.ts` | Parses `configs/home-claude/settings.json`, `configs/home-claude/CLAUDE.md`, `configs/tmux.conf`, `configs/starship.toml`. Enforces: >=40 deny rules in settings.json, every `*.sh` in `configs/hooks/` and `configs/project-claude/hooks/` starts with `#!/usr/bin/env bash` and contains `set -euo pipefail`. MCP servers are registered at install time via `claude mcp add`, not declared in a static mcp.json — verification of the MCP set belongs in e2e, not integration. |
 | `hooks.test.ts` | Pipes JSON fixtures from `tests/fixtures/` into `pre-destructive-blocker.sh` and `pre-secrets-guard.sh`, asserts `decision: "allow"` for safe inputs and `decision: "block"` with a non-empty `reason` for `rm -rf /` and AWS-key payloads. Entire suite is gated with `describe.skipIf(!jqAvailable)` — hooks require `jq`. |
 
@@ -62,7 +62,7 @@ Three contracts are covered:
 ```bash
 bun test tests/integration/                          # whole directory
 bun test tests/integration/cli.test.ts               # one file
-bun test tests/integration/ -t "primordial"          # single test by name substring
+bun test tests/integration/ -t "core"          # single test by name substring
 ```
 
 `hooks.test.ts` auto-skips when `jq` is missing — install it (`brew install jq` / `apt install jq`) before relying on a green run.
@@ -79,7 +79,7 @@ Add an integration test when the thing you're verifying is a **contract between 
 ### When NOT To Add A Test Here
 
 - **Pure function logic** (deep-merge helpers, path resolution, string formatting) → `tests/unit/`.
-- **Full install on a clean system** (verify primordial backup, idempotency across reruns, OS-adaptive package manager dispatch) → `tests/e2e/` with `testcontainers`.
+- **Full install on a clean system** (verify core backup, idempotency across reruns, OS-adaptive package manager dispatch) → `tests/e2e/` with `testcontainers`.
 - **Shellcheck lint** → `bun run lint:hooks`, not a test.
 - **CI-level bats verification** → `tests/ci/verify.bats` via `bun run test:ci`.
 

@@ -1,12 +1,12 @@
 {
   "name": "yka-code-health",
   "version": "0.1.0",
-  "description": "Reference implementation of the Claude Code `monitors` manifest key. Polls yka-code harness health (hooks, MCP registrations, primordial assets) and emits notifications on drift.",
+  "description": "Reference implementation of the Claude Code `monitors` manifest key. Polls yka-code harness health (hooks, MCP registrations, core assets) and emits notifications on drift.",
   "monitors": [
     {
-      "name": "primordial-install-health",
-      "description": "Detect drift in the yka-code primordial install: missing hooks, unregistered MCPs, or removed managed shell-rc blocks.",
-      "command": "${CLAUDE_PLUGIN_ROOT}/monitors/primordial-install-health.sh",
+      "name": "core-install-health",
+      "description": "Detect drift in the yka-code core install: missing hooks, unregistered MCPs, or removed managed shell-rc blocks.",
+      "command": "${CLAUDE_PLUGIN_ROOT}/monitors/core-install-health.sh",
       "when": "always"
     }
   ]

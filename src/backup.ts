@@ -1,4 +1,4 @@
-/** Per-file manifest backup used by primordial.ts. Layout: ~/.claude-backup/<ts>/<rel-path>. */
+/** Per-file manifest backup used by core.ts. Layout: ~/.claude-backup/<ts>/<rel-path>. */
 import { readdir } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import type { BackupManifest, BackupEntry } from "./types.js";

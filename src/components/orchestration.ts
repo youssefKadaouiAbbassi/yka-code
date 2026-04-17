@@ -16,7 +16,7 @@ export const orchestrationCategory: ComponentCategory = {
       id: 25,
       name: "agent-teams",
       displayName: "Agent Teams",
-      description: "Claude Code native agent teams (env var in primordial)",
+      description: "Claude Code native agent teams (env var in core)",
       tier: "optional",
       category: "orchestration",
       packages: [],
@@ -44,7 +44,7 @@ export const orchestrationCategory: ComponentCategory = {
 export async function install(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult[]> {
   const results: InstallResult[] = [];
 
-  // --- Agent Teams (env var managed by primordial) ---
+  // --- Agent Teams (env var managed by core) ---
   try {
     const hasTeams = !!process.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS;
     if (hasTeams) {
@@ -56,11 +56,11 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
         verifyPassed: true,
       });
     } else {
-      log.info("Agent Teams: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS env var should be set in your shell RC by the primordial layer");
+      log.info("Agent Teams: CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS env var should be set in your shell RC by the core layer");
       results.push({
         component: "Agent Teams",
         status: "skipped",
-        message: "Agent Teams env var is managed by the primordial layer — check your shell RC",
+        message: "Agent Teams env var is managed by the core layer — check your shell RC",
         verifyPassed: false,
       });
     }

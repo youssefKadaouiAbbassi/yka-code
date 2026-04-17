@@ -20,10 +20,10 @@ describe("CLI integration", () => {
     expect(result).toContain("[dry-run]");
   });
 
-  test("--tier primordial --dry-run installs only core", async () => {
+  test("--tier core --dry-run installs only core", async () => {
     const result =
-      await $`bun run ${SETUP_BIN} --tier primordial --dry-run`.text();
-    expect(result).toContain("primordial");
+      await $`bun run ${SETUP_BIN} --tier core --dry-run`.text();
+    expect(result).toContain("core");
   });
 
   test("status subcommand runs", async () => {

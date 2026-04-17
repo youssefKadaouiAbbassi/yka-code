@@ -20,8 +20,8 @@ Every category installer is expected to be **idempotent**, register MCP servers 
 | `skills-registry.ts` | recommended | skills.sh seed bundle | `npx skills add` for find-skills, caveman, karpathy-guidelines, playwright-cli |
 | `security.ts` | recommended | Snyk MCP (5), container-use (15) | `npm i -g snyk@latest` + `snyk mcp configure --tool=claude-cli`; brew/curl install Dagger's `container-use` |
 | `github.ts` | recommended | gh (16), github-mcp (17), claude-code-action (18), claude-code-review (19) | brew/apt/pacman/dnf `gh`; registers `github` HTTP MCP (needs `GITHUB_PAT`); others are guidance-only (GH Actions / native CC feature gated on `claude >= 2.1.104`) |
-| `workstation.ts` | recommended | Ghostty (36), tmux (37), chezmoi (39), age (41) | brew/pacman/curl Ghostty; **verifies tmux only** (installed by primordial); brew/curl chezmoi; brew/binary-download `age` |
-| `orchestration.ts` | optional | Agent Teams (25), Multica (26) | Verifies `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var (primordial); runs multica upstream install.sh `--with-server` (CLI + docker-compose stack) |
+| `workstation.ts` | recommended | Ghostty (36), tmux (37), chezmoi (39), age (41) | brew/pacman/curl Ghostty; **verifies tmux only** (installed by core); brew/curl chezmoi; brew/binary-download `age` |
+| `orchestration.ts` | optional | Agent Teams (25), Multica (26) | Verifies `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var (core); runs multica upstream install.sh `--with-server` (CLI + docker-compose stack) |
 | `workflow.ts` | optional | Composio (35) | Auto-bootstraps Composio MCP server via HTTP POST to backend.composio.dev (needs `COMPOSIO_API_KEY`), then registers HTTP MCP |
 
 ## Module Contract
@@ -42,7 +42,7 @@ export async function install(
 
 Every component install in this directory follows the same pattern. Deviating breaks idempotency guarantees.
 
-1. **Probe first** — `commandExists(bin)` or an `import` check (for Python packages) or env-var presence (for primordial-managed components).
+1. **Probe first** — `commandExists(bin)` or an `import` check (for Python packages) or env-var presence (for core-managed components).
 2. **Short-circuit** — if already installed, push `status: "already-installed"`, `verifyPassed: true`, return.
 3. **Dry-run branch** — log the command that would run, push `status: "skipped"`, `verifyPassed: false`, return.
 4. **Install branch** — run via `Bun.$` (`await $`sh -c "..."`.quiet()`), then re-probe and set `verifyPassed` from the probe.
@@ -116,7 +116,7 @@ Tools and services invoked by these modules (not runtime deps of the installer i
 
 ### Required Environment Variables
 
-Set by the operator in their shell RC (some have primordial defaults):
+Set by the operator in their shell RC (some have core defaults):
 
 | Var | Needed by | Notes |
 |-----|-----------|-------|
@@ -126,7 +126,7 @@ Set by the operator in their shell RC (some have primordial defaults):
 | `COMPOSIO_MCP_SERVER_ID` | Composio MCP | Auto-created on first install via bootstrap-server POST; persisted into secrets.env |
 | `COMPOSIO_USER_ID` | Composio MCP | Defaults to `$USER` / basename of `$HOME` |
 | `STITCH_API_KEY` | Google Stitch MCP | User-supplied; obtain via `npx @_davideast/stitch-mcp init` |
-| `OTEL_EXPORTER_OTLP_ENDPOINT`, `CLAUDE_CODE_ENABLE_TELEMETRY` | observability | Set by primordial layer |
-| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | orchestration | Set by primordial layer |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`, `CLAUDE_CODE_ENABLE_TELEMETRY` | observability | Set by core layer |
+| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | orchestration | Set by core layer |
 
 <!-- MANUAL: -->

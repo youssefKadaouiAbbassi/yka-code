@@ -43,11 +43,11 @@ Three install tiers gate every component:
 
 | Tier | Prompt | Default | What it contains |
 |------|--------|---------|------------------|
-| **Primordial** | none (silent) | always installs | `settings.json`, `CLAUDE.md` + symlinks, 6 hook scripts, `tmux.conf`, `starship.toml`, `statusline.sh`, `mise`, `just`, git aliases, telemetry env vars, `tasks/lessons.md` |
+| **Core** | none (silent) | always installs | `settings.json`, `CLAUDE.md` + symlinks, 6 hook scripts, `tmux.conf`, `starship.toml`, `statusline.sh`, `mise`, `just`, git aliases, telemetry env vars, `tasks/lessons.md` |
 | **Recommended** | yes/no | **yes** | Code Intelligence (Serena + ast-grep), Browser+Web (Playwright + Crawl4AI + Docfork + DeepWiki), Memory+Context (claude-mem + context-mode + claude-hud), cc-plugins (Anthropic official marketplace), skills-registry (skills.sh seed bundle), Security (Snyk + container-use), GitHub stack, Workstation extras |
 | **Optional** | yes/no | **no** | Observability (ccflare), Orchestration (Multica), Design (Stitch + awesome-design-md), Knowledge (Obsidian + claude-obsidian), Workflow (n8n + Composio) |
 
-Primordial files are **backed up then overridden** at `~/.claude-backup/{timestamp}/`. Component installs must be **idempotent** (check before acting), MCP entries must be **deep-merged** into existing JSON, and shell rc edits use the `# yka-code-managed` marker to prevent duplication.
+Core files are **backed up then overridden** at `~/.claude-backup/{timestamp}/`. Component installs must be **idempotent** (check before acting), MCP entries must be **deep-merged** into existing JSON, and shell rc edits use the `# yka-code-managed` marker to prevent duplication.
 
 ## Key Files
 
@@ -67,9 +67,9 @@ Each subdirectory has its own `AGENTS.md` (or should) with the detailed contract
 | Directory | Purpose |
 |-----------|---------|
 | `bin/` | CLI entry point (`setup.ts`) — wires `citty` commands and dispatches to `src/commands/` |
-| `src/` | Installer source — `types.ts`, `utils.ts`, `detect.ts`, `backup.ts`, `primordial.ts`, `verify.ts`, `status.ts`, `restore.ts`, plus `commands/` and `components/` subtrees |
+| `src/` | Installer source — `types.ts`, `utils.ts`, `detect.ts`, `backup.ts`, `core.ts`, `verify.ts`, `status.ts`, `restore.ts`, plus `commands/` and `components/` subtrees |
 | `src/components/` | 13 category installers (code-intel, browser-web, memory-context, cc-plugins, skills-registry, security, github, workstation, observability, orchestration, design, knowledge, workflow) exported through `index.ts` barrel |
-| `configs/` | Templates deployed by `primordial.ts` — `home-claude/`, `project-claude/`, `hooks/`, plus `tmux.conf`, `starship.toml`, `statusline.sh` |
+| `configs/` | Templates deployed by `core.ts` — `home-claude/`, `project-claude/`, `hooks/`, plus `tmux.conf`, `starship.toml`, `statusline.sh` |
 | `agents/` | /do orchestrator subagents (do-classifier, do-clarifier, do-recorder) deployed to `~/.claude/agents/` |
 | `skills/` | Orchestration skills (do, team-do, ship-feature, fix-bug, refactor-safely, security-audit, onboard-codebase, tdd-first, doc-hygiene, ci-hygiene, knowledge-base, release-cut, setup, loop-patterns, worktree-task) deployed to `~/.claude/skills/` |
 | `commands/` | User-level slash commands (/do) deployed to `~/.claude/commands/` |
@@ -92,7 +92,7 @@ Each subdirectory has its own `AGENTS.md` (or should) with the detailed contract
 ### Hard Rules For Installer Code
 
 1. **Idempotency is mandatory.** Every `install()` must check `verify()` first and return `{ skipped: true }` if already installed.
-2. **Never overwrite without backup.** Primordial files must call `backup.ts` before writing. `tasks/lessons.md` is **never** overwritten once it exists.
+2. **Never overwrite without backup.** Core files must call `backup.ts` before writing. `tasks/lessons.md` is **never** overwritten once it exists.
 3. **Deep-merge JSON, never replace.** Use `deepmerge-ts` for `settings.json`, `.mcp.json`, `.gitconfig` modifications.
 4. **Shell rc edits are guarded.** Wrap additions with `# yka-code-managed` markers and check for them before appending.
 5. **OS-adaptive installs.** Every binary install must handle brew / apt / pacman / dnf (plus `curl|sh` fallbacks) via the `installBinary(pkg, env)` helper in `src/utils.ts`.

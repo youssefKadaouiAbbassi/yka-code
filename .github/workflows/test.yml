@@ -69,7 +69,7 @@ jobs:
           bun-version: "1.2.x"
       - run: sudo apt-get install -y bats jq
       - run: bun install --frozen-lockfile
-      - run: bun run bin/setup.ts setup --non-interactive --tier primordial
+      - run: bun run bin/setup.ts setup --non-interactive --tier core
       - run: bats tests/ci/verify.bats
 
   bats-macos:
@@ -86,5 +86,5 @@ jobs:
           bun-version: "1.2.x"
       - run: brew install bats-core jq
       - run: bun install --frozen-lockfile
-      - run: bun run bin/setup.ts setup --non-interactive --tier primordial
+      - run: bun run bin/setup.ts setup --non-interactive --tier core
       - run: bats tests/ci/verify.bats

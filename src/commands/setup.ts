@@ -2,7 +2,7 @@ import { defineCommand } from "citty";
 import * as clack from "@clack/prompts";
 import pc from "picocolors";
 import { detectEnvironment } from "../detect.js";
-import { installPrimordial, isLocalScope } from "../primordial.js";
+import { installCore, isLocalScope } from "../core.js";
 import { verifyAll } from "../verify.js";
 import {
   RECOMMENDED_CATEGORIES,
@@ -95,10 +95,10 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
   // --- 2. Show detected environment ---
   clack.note(formatEnvLine(env), "Detected environment");
 
-  // --- 3. Explain primordial ---
+  // --- 3. Explain core ---
   clack.note(
     [
-      "The primordial layer installs the core Claude Code foundation:",
+      "The core layer installs the core Claude Code foundation:",
       "  • Hook scripts (pre-tool-use, post-tool-use, notification, stop)",
       "  • settings.json with hardened permissions.deny rules",
       "  • Shell RC additions (aliases, env vars)",
@@ -108,15 +108,15 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
     "What the core install does"
   );
 
-  // --- 4. Primordial install ---
-  // Don't wrap in a spinner: primordial may shell out to package managers (apt/brew/etc)
+  // --- 4. Core install ---
+  // Don't wrap in a spinner: core may shell out to package managers (apt/brew/etc)
   // which need stdin/stdout for sudo prompts and progress output.
-  log.info("Installing primordial core (you may be prompted for sudo)...");
-  const primordialResults = await installPrimordial(env, dryRun, deployMode);
-  log.success("Primordial core step complete");
+  log.info("Installing core core (you may be prompted for sudo)...");
+  const coreResults = await installCore(env, dryRun, deployMode);
+  log.success("Core core step complete");
 
   if (isLocalScope(env)) {
-    const report = await verifyAll(env, primordialResults);
+    const report = await verifyAll(env, coreResults);
     clack.note(
       `Project-scope install complete in ${env.claudeDir}.\nCategory installers skipped — MCPs/binaries belong at user scope.\nRun without --local to install those globally.`,
       "Local install complete",
@@ -272,7 +272,7 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
     }
   }
 
-  const allResults = [...primordialResults, ...categoryResults];
+  const allResults = [...coreResults, ...categoryResults];
 
   // --- 6.5. Re-apply hardened settings (some third-party installs reset deny rules) ---
   await reapplyHardenedSettings(env, dryRun);
@@ -437,16 +437,16 @@ async function runBatch(
   log.info(`Tier: ${tier ?? "all"}, dry-run: ${dryRun}`);
   log.info(`OS: ${env.os} (${env.arch}), shell: ${env.shell}, pkg: ${env.packageManager}`);
 
-  const primordialResults = await installPrimordial(env, dryRun, deployMode);
-  if (tier === "primordial" || isLocalScope(env)) {
+  const coreResults = await installCore(env, dryRun, deployMode);
+  if (tier === "core" || isLocalScope(env)) {
     if (isLocalScope(env)) log.info("Local install complete (category installers skipped — they're user-global).");
-    else log.info("Primordial tier complete.");
-    const report = await verifyAll(env, primordialResults);
+    else log.info("Core tier complete.");
+    const report = await verifyAll(env, coreResults);
     log.info(`Verification: ${report.passed} passed, ${report.failed} failed, ${report.skipped} skipped`);
     return;
   }
 
-  const allResults = [...primordialResults];
+  const allResults = [...coreResults];
   for (const cat of pickCategories(tier)) {
     log.info(`Installing category: ${cat.name}`);
     try {
@@ -500,7 +500,7 @@ async function recordJournal(env: DetectedEnvironment, tier: string | undefined)
 
   await writeJournal({
     version,
-    tier: (tier === "primordial" || tier === "recommended" || tier === "all") ? tier : "recommended",
+    tier: (tier === "core" || tier === "recommended" || tier === "all") ? tier : "recommended",
     scope: isLocalScope(env) ? "local" : "global",
     installedAt: new Date().toISOString(),
     plugins: actuallyInstalled.map((name) => ({ name, marketplace: "claude-plugins-official" })),
@@ -523,7 +523,7 @@ export default defineCommand({
     },
     tier: {
       type: "string",
-      description: "Install tier: primordial, recommended, all",
+      description: "Install tier: core, recommended, all",
     },
     "dry-run": {
       type: "boolean",
@@ -570,7 +570,7 @@ export default defineCommand({
 
     // Validate tier if provided
     if (args.tier) {
-      const validTiers = ["primordial", "recommended", "all"];
+      const validTiers = ["core", "recommended", "all"];
       if (!validTiers.includes(args.tier)) {
         log.error(`Unknown tier "${args.tier}". Valid tiers: ${validTiers.join(", ")}`);
         process.exit(1);

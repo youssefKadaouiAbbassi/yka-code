@@ -73,7 +73,7 @@ describe("scope isolation guardrails", () => {
     expect(offenders).toEqual([]);
   });
 
-  test("installPrimordial and category installers receive env.claudeDir (no direct .claude path joins)", async () => {
+  test("installCore and category installers receive env.claudeDir (no direct .claude path joins)", async () => {
     const files = await walkTs(SRC_DIR);
     const offenders: { file: string; line: number; text: string }[] = [];
 

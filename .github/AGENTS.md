@@ -20,7 +20,7 @@ Two GitHub Actions workflows for the `@youssefKadaouiAbbassi/yka-code-setup` npm
 | `test` (matrix) | ubuntu-latest + macos-latest × bun 1.2.x + latest | — | `fail-fast: false`; runs typecheck + unit + integration + scenarios |
 | `lint-hooks` | ubuntu-latest | — | shellcheck on `configs/hooks/*.sh`, `configs/project-claude/hooks/*.sh`, `bootstrap.sh` |
 | `actionlint` | ubuntu-latest | — | Lints workflow YAML itself — catches shell errors inside `run:` blocks |
-| `bats-ubuntu` | ubuntu-latest | `test` | Runs the real installer with `--tier primordial`, then `bats tests/ci/verify.bats` |
+| `bats-ubuntu` | ubuntu-latest | `test` | Runs the real installer with `--tier core`, then `bats tests/ci/verify.bats` |
 | `bats-macos` | macos-latest | `test` | Same, on Apple Silicon |
 
 ## `publish.yml` jobs

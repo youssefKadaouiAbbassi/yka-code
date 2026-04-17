@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Project-scope Claude Code **hook script templates** — the post-edit lint advisory and post-build auto-test pair that `src/primordial.ts` deploys into a target repository's `.claude/hooks/` directory. Each script reads the standard Claude Code hook JSON envelope from stdin and emits exactly one JSON decision on stdout.
+Project-scope Claude Code **hook script templates** — the post-edit lint advisory and post-build auto-test pair that `src/core.ts` deploys into a target repository's `.claude/hooks/` directory. Each script reads the standard Claude Code hook JSON envelope from stdin and emits exactly one JSON decision on stdout.
 
 Where `configs/hooks/` ships the **user-scope** enforcement layer (destructive blocker, secrets guard, session lifecycle), this directory ships the **project-scope** observability layer: every hook here is **advisory only** and bounded to files inside the current git worktree. Project hooks never block; they surface results to stderr and always emit `{"decision":"allow"}`.
 
@@ -73,7 +73,7 @@ Before committing hook changes run `bun run lint:hooks` from the repo root — t
 
 ### Installer Integration
 
-- `src/primordial.ts` copies these files into `<project>/.claude/hooks/` during installer runs and registers them in the project `settings.json` under `hooks.PostToolUse`.
+- `src/core.ts` copies these files into `<project>/.claude/hooks/` during installer runs and registers them in the project `settings.json` under `hooks.PostToolUse`.
 - The installer must preserve executable bits (`chmod +x`) — Claude Code invokes hooks by path, not via `bash` prefix, so non-executable scripts fail with `EACCES`.
 - Template path resolution uses `new URL("../../configs/project-claude/hooks", import.meta.url).pathname` — works from source, bunx cache, and compiled binary alike (root `AGENTS.md` rule 7).
 - The installer never overwrites a project's existing `.claude/hooks/` files without first writing them to `~/.claude-backup/{timestamp}/` via `src/backup.ts`.
@@ -111,7 +111,7 @@ Before committing hook changes run `bun run lint:hooks` from the repo root — t
 
 ### Consumed By
 
-- **`src/primordial.ts`** — copies this tree to `<project>/.claude/hooks/` during installer runs, registers entries in project `settings.json`, sets executable bits.
+- **`src/core.ts`** — copies this tree to `<project>/.claude/hooks/` during installer runs, registers entries in project `settings.json`, sets executable bits.
 - **`src/verify.ts`** — post-install verification asserts both files are present, executable, and emit the JSON contract on a synthetic stdin.
 - **`src/backup.ts`** — backs up any pre-existing `.claude/hooks/*.sh` to `~/.claude-backup/{timestamp}/` before overwrite.
 

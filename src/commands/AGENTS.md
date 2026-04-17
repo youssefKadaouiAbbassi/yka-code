@@ -12,7 +12,7 @@ Parent contract: see `../AGENTS.md` for repo-wide rules (stack lock, idempotency
 
 | File | Status | Description |
 |------|--------|-------------|
-| `setup.ts` | Implemented | Interactive installer. Runs environment detection (`../detect.js`), installs primordial (`../primordial.js`), prompts for tier/category selection via `@clack/prompts`, installs selected categories (`../components/index.js`), runs verification (`../verify.js`), prints a summary and a post-install API-key checklist for MCP servers. Supports `--non-interactive`, `--tier <primordial\|recommended\|all>`, and `--dry-run` flags. |
+| `setup.ts` | Implemented | Interactive installer. Runs environment detection (`../detect.js`), installs core (`../core.js`), prompts for tier/category selection via `@clack/prompts`, installs selected categories (`../components/index.js`), runs verification (`../verify.js`), prints a summary and a post-install API-key checklist for MCP servers. Supports `--non-interactive`, `--tier <core\|recommended\|all>`, and `--dry-run` flags. |
 | `status.ts` | Stub | Prints `"Status: not yet implemented"`. Intended to display installed vs missing components. Real logic lives in `../status.ts` (`showStatus()` / `formatStatusTable()`) and must be wired in. |
 | `restore.ts` | Stub | Prints `"Restore: not yet implemented"`. Intended to restore configs from `~/.claude-backup/{timestamp}/`. Real logic lives in `../restore.ts` (`runRestore()`, `listAvailableBackups()`, `confirmRestore()`) and must be wired in. |
 
@@ -35,7 +35,7 @@ The default command (no subcommand) re-invokes `setup` with the same `rawArgs`, 
 | Flag | Type | Description |
 |------|------|-------------|
 | `--non-interactive` | boolean | Skip prompts, install every category with defaults. |
-| `--tier <name>` | string | One of `primordial`, `recommended`, `all`. |
+| `--tier <name>` | string | One of `core`, `recommended`, `all`. |
 | `--dry-run` | boolean | Report planned changes without touching the filesystem. |
 
 Mutually-exclusive priority: `--non-interactive` beats `--tier` beats interactive mode.
@@ -44,8 +44,8 @@ Mutually-exclusive priority: `--non-interactive` beats `--tier` beats interactiv
 
 1. `clack.intro` banner.
 2. Spinner: `detectEnvironment()` -> `clack.note` showing OS, shell, package manager, Claude Code / Docker / Bun versions.
-3. `clack.note` explaining the primordial layer.
-4. Spinner: `installPrimordial(env, dryRun)`.
+3. `clack.note` explaining the core layer.
+4. Spinner: `installCore(env, dryRun)`.
 5. `clack.select` tier: `Everything` / `Let me pick` / `Nothing`.
 6. If `pick`: one `clack.confirm` per recommended category (default yes) and per optional category (default no).
 7. Per selected category: spinner + `installCategory(cat, env, dryRun)`, accumulating `InstallResult[]`.
@@ -84,7 +84,7 @@ Both real implementations already use `@clack/prompts` (`intro`, `outro`, `selec
 
 ### Hard rules
 
-1. Command files **do not** touch the filesystem directly. Delegate to `../primordial.js`, `../components/index.js`, `../backup.js`, `../restore.js`, `../verify.js`.
+1. Command files **do not** touch the filesystem directly. Delegate to `../core.js`, `../components/index.js`, `../backup.js`, `../restore.js`, `../verify.js`.
 2. Honor `--dry-run` — pass it through to every installer call.
 3. Keep citty metadata (`meta.name`, `meta.description`) in sync with the flags advertised in `bin/setup.ts` and `README.md`.
 4. Never self-approve documentation or implementation changes here; authoring is one pass, review is a separate pass via `code-reviewer` or `verifier` (see parent `AGENTS.md` Writer vs Reviewer section).
@@ -99,7 +99,7 @@ Both real implementations already use `@clack/prompts` (`intro`, `outro`, `selec
 | `@clack/prompts` | `intro`, `outro`, `spinner`, `select`, `confirm`, `note`, `cancel`, `isCancel`. |
 | `picocolors` (`pc`) | Terminal colors. |
 | `../detect.js` | `detectEnvironment()` -> `DetectedEnvironment`. |
-| `../primordial.js` | `installPrimordial(env, dryRun)` -> `InstallResult[]`. |
+| `../core.js` | `installCore(env, dryRun)` -> `InstallResult[]`. |
 | `../verify.js` | `verifyAll(env, results)` -> `VerificationReport`. |
 | `../components/index.js` | `RECOMMENDED_CATEGORIES`, `OPTIONAL_CATEGORIES`, `ALL_CATEGORIES`, `installCategory()`. |
 | `../utils.js` | `log` (non-interactive output). |

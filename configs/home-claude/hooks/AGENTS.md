@@ -6,7 +6,7 @@
 
 **Intentionally empty placeholder directory.** Its sole job is to guarantee that the deploy target `~/.claude/hooks/` exists on the user's machine before the installer copies the canonical hook scripts into it.
 
-The actual user-scope hook scripts **do not live here**. They live in `configs/hooks/` (see `../../hooks/AGENTS.md`) and are deployed by `src/primordial.ts` into `~/.claude/hooks/` at install time. Keeping this directory under `configs/home-claude/` mirrors the target layout one-for-one, which keeps the installer's path resolution trivial.
+The actual user-scope hook scripts **do not live here**. They live in `configs/hooks/` (see `../../hooks/AGENTS.md`) and are deployed by `src/core.ts` into `~/.claude/hooks/` at install time. Keeping this directory under `configs/home-claude/` mirrors the target layout one-for-one, which keeps the installer's path resolution trivial.
 
 ## Key Files
 
@@ -14,7 +14,7 @@ The actual user-scope hook scripts **do not live here**. They live in `configs/h
 |------|--------|
 | *(none)* | This directory is intentionally empty. `.gitkeep` is not required because the empty directory is tracked by virtue of containing this `AGENTS.md` |
 
-If you find hook scripts (`*.sh`, `*.js`, `*.ts`) inside this directory, they are **misplaced** — move them to `configs/hooks/` and confirm `src/primordial.ts` still resolves the deploy path correctly.
+If you find hook scripts (`*.sh`, `*.js`, `*.ts`) inside this directory, they are **misplaced** — move them to `configs/hooks/` and confirm `src/core.ts` still resolves the deploy path correctly.
 
 ## For AI Agents
 
@@ -30,7 +30,7 @@ If you find hook scripts (`*.sh`, `*.js`, `*.ts`) inside this directory, they ar
 1. **No scripts in this directory.** The installer expects it empty at source and populated only at the deploy target.
 2. **No `.gitignore`, no `.gitkeep`** unless the directory would otherwise disappear from version control. The presence of `AGENTS.md` already pins it.
 3. **If you need to add a new user-scope hook**, add it to `configs/hooks/`, wire it in `../settings.json`, and document it in `../../hooks/AGENTS.md`. Do not touch this directory.
-4. **Backward-compatible only.** Removing this directory would make `src/primordial.ts` create `~/.claude/hooks/` on the fly, which works today but changes the install audit trail — do not change without updating `src/primordial.ts` and `src/verify.ts` in the same commit.
+4. **Backward-compatible only.** Removing this directory would make `src/core.ts` create `~/.claude/hooks/` on the fly, which works today but changes the install audit trail — do not change without updating `src/core.ts` and `src/verify.ts` in the same commit.
 
 ## Dependencies
 
@@ -42,7 +42,7 @@ If you find hook scripts (`*.sh`, `*.js`, `*.ts`) inside this directory, they ar
 
 ### Consumed By
 
-- **`src/primordial.ts`** — resolves `~/.claude/hooks/` as the deploy target for scripts sourced from `configs/hooks/`; relies on this directory existing at the source tree to mirror the layout
+- **`src/core.ts`** — resolves `~/.claude/hooks/` as the deploy target for scripts sourced from `configs/hooks/`; relies on this directory existing at the source tree to mirror the layout
 - **`src/verify.ts`** — post-install check that `~/.claude/hooks/` exists and is writable
 
 ### External References

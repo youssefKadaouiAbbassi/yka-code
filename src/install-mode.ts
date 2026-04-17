@@ -47,7 +47,7 @@ export function resolveClaudeDir(
 /**
  * Pure function returning a new env with claudeDir rewritten for the target scope.
  * shellRcPath and homeDir stay put: shell rc is user-global by design, and --local
- * installs skip shell-rc edits + global binary installs (see primordial.ts).
+ * installs skip shell-rc edits + global binary installs (see core.ts).
  */
 export function rewriteEnvForScope(
   env: DetectedEnvironment,

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# primordial-install-health: each stdout line becomes a Claude notification.
+# core-install-health: each stdout line becomes a Claude notification.
 # Poll interval is governed by CC; exit 0 keeps the monitor alive.
 set -uo pipefail
 

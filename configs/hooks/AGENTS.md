@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Claude Code **hook script templates** — the enforcement and observability layer that `src/primordial.ts` deploys to `~/.claude/hooks/` (and/or the project's `.claude/hooks/`). Each script reads Claude Code's hook JSON from stdin and emits a JSON decision on stdout, acting as a blocking gate (PreToolUse), advisory notifier (PostToolUse / Stop), or session-lifecycle logger (SessionStart / SessionEnd).
+Claude Code **hook script templates** — the enforcement and observability layer that `src/core.ts` deploys to `~/.claude/hooks/` (and/or the project's `.claude/hooks/`). Each script reads Claude Code's hook JSON from stdin and emits a JSON decision on stdout, acting as a blocking gate (PreToolUse), advisory notifier (PostToolUse / Stop), or session-lifecycle logger (SessionStart / SessionEnd).
 
 These are **templates** — they are copied verbatim onto the target system by the installer, not imported or executed from this directory at installer runtime. The installer only reads these files; the Claude Code process on the target machine runs them.
 
@@ -70,7 +70,7 @@ Before committing hook changes, run `bun run lint:hooks` (shellcheck) from the r
 
 ### Installer Integration
 
-- `src/primordial.ts` copies these files into `${HOME}/.claude/hooks/` during the Primordial tier install and registers them in the target `settings.json` under `hooks.PreToolUse` / `hooks.PostToolUse` / `hooks.SessionStart` / `hooks.SessionEnd` / `hooks.Stop`.
+- `src/core.ts` copies these files into `${HOME}/.claude/hooks/` during the Core tier install and registers them in the target `settings.json` under `hooks.PreToolUse` / `hooks.PostToolUse` / `hooks.SessionStart` / `hooks.SessionEnd` / `hooks.Stop`.
 - File permissions must be preserved as executable (`chmod +x`) by the install step — hooks invoked via `command` strings without `bash` prefix will otherwise fail with `EACCES`.
 - Template resolution uses `new URL("../configs/hooks", import.meta.url).pathname` (see parent AGENTS.md rule 7) so paths work from source, bunx cache, and compiled binary alike.
 

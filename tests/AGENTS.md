@@ -22,9 +22,9 @@ Five test types from fast/pure to end-to-end against a temp `$HOME`.
 
 | Directory | Purpose |
 |-----------|---------|
-| `unit/` | Pure unit tests for `src/utils.ts`, `src/detect.ts`, `src/backup.ts`, `src/verify.ts`, `src/install-journal.ts`, `src/install-mode.ts`, `src/add-on-top.ts`, plus `primordial-scope` and `grep-guardrails`. All filesystem work in `mkdtemp` temp dirs. |
+| `unit/` | Pure unit tests for `src/utils.ts`, `src/detect.ts`, `src/backup.ts`, `src/verify.ts`, `src/install-journal.ts`, `src/install-mode.ts`, `src/add-on-top.ts`, plus `core-scope` and `grep-guardrails`. All filesystem work in `mkdtemp` temp dirs. |
 | `integration/` | Spawns the real CLI (`bin/setup.ts`) via `Bun.$`, validates shipped configs (`config-validation.test.ts`), pipes fixtures through hook scripts (`hooks.test.ts`, gated on `jq`). |
-| `scenarios/` | Full install flows: `primordial.test.ts` mocks `installBinary` and drives the whole `installPrimordial` pipeline against a temp home; `cli-flows.test.ts` walks CLI argument matrices. |
+| `scenarios/` | Full install flows: `core.test.ts` mocks `installBinary` and drives the whole `installCore` pipeline against a temp home; `cli-flows.test.ts` walks CLI argument matrices. |
 | `ci/` | Bats post-install assertions driven by `bun run test:ci`. Requires `bats` on PATH. |
 | `fixtures/` | Hand-authored inputs: `hook-stdin-*.json` payloads piped into hook scripts; `settings-existing.json` for merge tests. |
 
@@ -40,8 +40,8 @@ Five test types from fast/pure to end-to-end against a temp `$HOME`.
 
 ### Hard Rules
 
-1. **Never touch the real `~/.claude/`.** Use `mkdtemp(join(tmpdir(), "yka-code-..."))` and override `env.homeDir` / `env.claudeDir` on a `DetectedEnvironment` stub. See `tests/scenarios/primordial.test.ts` for the `mockEnv` pattern.
-2. **No real package-manager calls.** `tests/scenarios/primordial.test.ts` uses `mock.module("../../src/utils.js", ...)` to replace `installBinary` with an `already-installed` stub. Never let `apt`/`brew`/`curl|sh` run from a test.
+1. **Never touch the real `~/.claude/`.** Use `mkdtemp(join(tmpdir(), "yka-code-..."))` and override `env.homeDir` / `env.claudeDir` on a `DetectedEnvironment` stub. See `tests/scenarios/core.test.ts` for the `mockEnv` pattern.
+2. **No real package-manager calls.** `tests/scenarios/core.test.ts` uses `mock.module("../../src/utils.js", ...)` to replace `installBinary` with an `already-installed` stub. Never let `apt`/`brew`/`curl|sh` run from a test.
 3. **Idempotency is tested, not assumed.** Any installer spec must run the install twice and assert no duplicate shell-rc blocks, no duplicate `permissions.deny` entries, and preserved user-authored content.
 4. **Gate external-tool tests with `describe.skipIf`.** Hook specs that shell out to `jq`: `describe.skipIf(!Bun.which("jq"))`.
 5. **Clean up in `afterEach`.** `rm(tmpDir, { recursive: true, force: true })`. Scenario specs that create real backups must use the `YKA_CODE_BACKUP_BASE` or `YKA_CODE_JOURNAL_PATH` env overrides to avoid polluting `~/.claude-backup/` or `~/.config/yka-code/`.

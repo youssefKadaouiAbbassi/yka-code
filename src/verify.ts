@@ -8,7 +8,7 @@ import type { Component, DetectedEnvironment, InstallResult, VerificationReport,
 // surface the actual MCP registration status from each component.
 const MCP_SERVER_NAMES: string[] = [];
 
-// Hooks actually deployed by the primordial installer (configs/hooks/).
+// Hooks actually deployed by the core installer (configs/hooks/).
 const HOOK_FILES = [
   "pre-secrets-guard.sh",
   "pre-destructive-blocker.sh",

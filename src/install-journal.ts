@@ -5,7 +5,7 @@ import { fileExists } from "./utils.js";
 
 export type InstallJournal = {
   version: string;
-  tier: "primordial" | "recommended" | "all";
+  tier: "core" | "recommended" | "all";
   scope: "global" | "local";
   installedAt: string;
   plugins: { name: string; marketplace: string }[];
