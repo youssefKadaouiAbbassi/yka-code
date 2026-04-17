@@ -42,7 +42,7 @@ export const githubCategory: ComponentCategory = {
         url: "https://api.githubcopilot.com/mcp/",
         headers: { Authorization: "Bearer ${GITHUB_PAT}" },
       },
-      verifyCommand: "echo github-mcp-config",
+      verifyCommand: "claude mcp list | grep -q '^github:'",
     },
     {
       id: 18,

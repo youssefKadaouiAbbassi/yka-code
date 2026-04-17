@@ -37,10 +37,14 @@
     "access": "public"
   },
   "files": [
-    "bin/",
+    "bin/setup.ts",
+    "bin/AGENTS.md",
     "src/",
     "configs/",
-    "agents/"
+    "agents/",
+    "skills/",
+    "commands/",
+    ".claude-plugin/"
   ],
   "keywords": [
     "claude-code",

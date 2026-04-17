@@ -34,10 +34,12 @@ claude -p "Run: echo hello" --allowedTools Bash --output-format json | grep -q "
 
 echo "=== RUNNING FULL TEST SUITE ==="
 echo "Finding bun executable..."
-BUN_PATH=$(find /usr/local /usr /root -name bun -type f -executable 2>/dev/null | head -1)
+BUN_PATH=$(command -v bun || true)
+if [ -z "$BUN_PATH" ]; then
+    BUN_PATH=$(find /usr/local /usr /root "$HOME" /home -maxdepth 6 -name bun -type f -executable 2>/dev/null | head -1)
+fi
 if [ -z "$BUN_PATH" ]; then
     echo "ERROR: bun executable not found anywhere"
-    find /usr/local /usr /root -name "*bun*" -type f 2>/dev/null || echo "No bun files found"
     exit 1
 fi
 echo "Using bun at: $BUN_PATH"

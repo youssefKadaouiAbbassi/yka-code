@@ -40,7 +40,7 @@ export const browserWebCategory: ComponentCategory = {
         },
       ],
       warningNote: "Crawl4AI v0.8.5 had a supply chain issue — always use v0.8.6+",
-      verifyCommand: "python3 -c \"import crawl4ai\"",
+      verifyCommand: "for p in python3 python; do command -v $p >/dev/null && exec $p -c 'import crawl4ai'; done; exit 1",
     },
     {
       id: 10,
@@ -57,7 +57,7 @@ export const browserWebCategory: ComponentCategory = {
         args: ["docfork"],
         env: { DOCFORK_API_KEY: "${DOCFORK_API_KEY}" },
       },
-      verifyCommand: "echo docfork-mcp-config",
+      verifyCommand: "claude mcp list | grep -q '^docfork:'",
     },
     {
       id: 11,
@@ -72,7 +72,7 @@ export const browserWebCategory: ComponentCategory = {
         type: "http",
         url: "https://mcp.deepwiki.com/mcp",
       },
-      verifyCommand: "echo deepwiki-mcp-config",
+      verifyCommand: "claude mcp list | grep -q '^deepwiki:'",
     },
   ],
 };

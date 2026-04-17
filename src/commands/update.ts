@@ -20,6 +20,10 @@ async function detectInstallSource(): Promise<{ source: InstallSource; hint: str
     return { source: "npx", hint: "re-invoke via `npx @youssefKadaouiAbbassi/code-tools-setup@latest update`" };
   }
 
+  if (exec.includes("/dist/") || import.meta.dir.includes("/dist/")) {
+    return { source: "unknown", hint: "this is a compiled binary — download the newer release from GitHub, or run `npm i -g @youssefKadaouiAbbassi/code-tools-setup@latest`" };
+  }
+
   if (commandExists("npm")) {
     const ls = await $`npm ls -g --depth=0 --json`.quiet().nothrow();
     if (ls.exitCode === 0 && ls.text().includes("@youssefKadaouiAbbassi/code-tools-setup")) {

@@ -95,6 +95,28 @@ check_secret 'Endpoint=sb://[^;]+;SharedAccessKeyName=[^;]+;SharedAccessKey=' "B
 # npm tokens
 check_secret 'npm_[a-zA-Z0-9]{36}' "Blocked: npm access token (npm_...)"
 
+# GitLab PATs
+check_secret 'glpat-[A-Za-z0-9_\-]{20,}' "Blocked: GitLab personal access token (glpat-...)"
+
+# HuggingFace tokens
+check_secret 'hf_[A-Za-z0-9]{34,}' "Blocked: HuggingFace token (hf_...)"
+
+# SendGrid
+check_secret 'SG\.[A-Za-z0-9_\-]{22}\.[A-Za-z0-9_\-]{43}' "Blocked: SendGrid API key (SG....)"
+
+# Linear
+check_secret 'lin_api_[A-Za-z0-9]{40,}' "Blocked: Linear API key (lin_api_...)"
+
+# Postman
+check_secret 'PMAK-[A-Za-z0-9]{24}-[A-Za-z0-9]{34}' "Blocked: Postman API key (PMAK-...)"
+
+# Twilio
+check_secret 'AC[a-f0-9]{32}' "Blocked: Twilio Account SID (AC...)"
+check_secret 'SK[a-f0-9]{32}' "Blocked: Twilio API key SID (SK...)"
+
+# Slack app-level
+check_secret 'xapp-[0-9]+-[A-Z0-9]+-[0-9]+-[a-f0-9]+' "Blocked: Slack app-level token (xapp-...)"
+
 # Generic high-entropy secrets in variable assignments
 check_secret '(password|passwd|secret|api_key|apikey|auth_token|access_token)[[:space:]]*=[[:space:]]*["\x27][A-Za-z0-9+/=_\-]{20,}["\x27]' "Blocked: Hardcoded credential in assignment"
 

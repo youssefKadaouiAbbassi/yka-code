@@ -17,6 +17,44 @@ export interface AddOnTopManifest {
   conflictPolicy: "skip" | "overwrite";
 }
 
+export interface DeployMode {
+  mode: "clean" | "add-on-top" | "fresh";
+  addOnTopLogPath?: string;
+  conflictPolicy?: "skip" | "overwrite";
+  claudeDir: string;
+}
+
+export async function resolveWrite(
+  target: string,
+  deployMode: DeployMode | undefined,
+): Promise<"write" | "skip"> {
+  if (!deployMode?.addOnTopLogPath) return "write";
+  const exists = await fileExists(target);
+  if (!exists) {
+    await logCreate(deployMode.addOnTopLogPath, target);
+    return "write";
+  }
+  if (deployMode.conflictPolicy === "overwrite") {
+    await logOverwrite(deployMode.addOnTopLogPath, deployMode.claudeDir, target);
+    return "write";
+  }
+  await logSkip(deployMode.addOnTopLogPath, target, "exists, policy=skip");
+  return "skip";
+}
+
+export async function resolveMerge(
+  target: string,
+  mergedKeys: string[],
+  deployMode: DeployMode | undefined,
+): Promise<void> {
+  if (!deployMode?.addOnTopLogPath) return;
+  if (await fileExists(target)) {
+    await logMerge(deployMode.addOnTopLogPath, deployMode.claudeDir, target, mergedKeys);
+  } else {
+    await logCreate(deployMode.addOnTopLogPath, target);
+  }
+}
+
 function nowIso(): string {
   return new Date().toISOString();
 }

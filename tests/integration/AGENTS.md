@@ -17,7 +17,7 @@ Three contracts are covered:
 | File | What it verifies |
 |------|------------------|
 | `cli.test.ts` | Executes `bun run bin/setup.ts` with `--help`, `--non-interactive --dry-run`, `--tier primordial --dry-run`, and the `status` / `restore` subcommands. Asserts output markers and exit codes. |
-| `config-validation.test.ts` | Parses `configs/home-claude/settings.json`, `configs/project-claude/mcp.json`, `configs/home-claude/CLAUDE.md`, `configs/tmux.conf`, `configs/starship.toml`. Enforces: >=40 deny rules, pinned `model` string, exactly 7 MCP servers with the expected name set (`serena`, `docfork`, `github`, `context-mode`, `composio`, `postgres-pro`, `snyk`), CLAUDE.md < 100 lines, every `*.sh` in `configs/hooks/` and `configs/project-claude/hooks/` starts with `#!/usr/bin/env bash` and contains `set -euo pipefail`, `tmux.conf` has `set -g prefix C-a`, total config file count is 17. |
+| `config-validation.test.ts` | Parses `configs/home-claude/settings.json`, `configs/home-claude/CLAUDE.md`, `configs/tmux.conf`, `configs/starship.toml`. Enforces: >=40 deny rules in settings.json, every `*.sh` in `configs/hooks/` and `configs/project-claude/hooks/` starts with `#!/usr/bin/env bash` and contains `set -euo pipefail`. MCP servers are registered at install time via `claude mcp add`, not declared in a static mcp.json — verification of the MCP set belongs in e2e, not integration. |
 | `hooks.test.ts` | Pipes JSON fixtures from `tests/fixtures/` into `pre-destructive-blocker.sh` and `pre-secrets-guard.sh`, asserts `decision: "allow"` for safe inputs and `decision: "block"` with a non-empty `reason` for `rm -rf /` and AWS-key payloads. Entire suite is gated with `describe.skipIf(!jqAvailable)` — hooks require `jq`. |
 
 ## Dependencies
@@ -71,7 +71,7 @@ bun test tests/integration/ -t "primordial"          # single test by name subst
 
 Add an integration test when the thing you're verifying is a **contract between two subsystems owned by this repo** that can be exercised by reading a real file or running a real binary, but does **not** require a sandboxed `~/.claude/` install.
 
-- Adding a new MCP server → update `mcp.json server names match expected set` and the `has 7 MCP servers` count assertion in `config-validation.test.ts`.
+- Adding a new MCP server → add a `registerMcp()` call in the relevant `src/components/*.ts` and update the install journal / uninstall allowlist in `src/utils/backup.ts` (`CODE_TOOLS_MANAGED_MCPS`). There is no static mcp.json to update.
 - Adding a new hook in `configs/hooks/` → it is automatically swept by the shebang / `set -euo pipefail` tests; add a dedicated `describe` block in `hooks.test.ts` with fixtures if it has decision logic.
 - Adding a new CLI flag or subcommand to `bin/setup.ts` → add an assertion in `cli.test.ts` (`--help` output and, if stateless, a `--dry-run` invocation).
 - Changing the pinned deny-rule floor, model, or total config file count → update the constants in `config-validation.test.ts` in the same commit. These numbers are load-bearing guardrails, not arbitrary.

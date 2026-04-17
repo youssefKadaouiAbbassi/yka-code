@@ -14,6 +14,7 @@ import {
   log,
 } from "./utils.js";
 import { createBackup, restoreFromPartialManifest } from "./backup.js";
+import { resolveWrite, resolveMerge, type DeployMode } from "./add-on-top.js";
 
 export function isLocalScope(env: DetectedEnvironment): boolean {
   const home = env.homeDir.replace(/\/+$/, "");
@@ -24,7 +25,7 @@ export function templateDir(env: DetectedEnvironment): "home-claude" | "project-
   return isLocalScope(env) ? "project-claude" : "home-claude";
 }
 
-async function deploySettings(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
+async function deploySettings(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "claude-settings";
   const targetPath = join(env.claudeDir, "settings.json");
   const sourcePath = join(getConfigsDir(), templateDir(env), "settings.json");
@@ -37,6 +38,7 @@ async function deploySettings(env: DetectedEnvironment, dryRun: boolean): Promis
   try {
     await ensureDir(env.claudeDir);
     const patch = await Bun.file(sourcePath).json() as Record<string, unknown>;
+    await resolveMerge(targetPath, Object.keys(patch), deployMode);
     await mergeJsonFile(targetPath, patch);
     log.success(`Merged settings.json into ${targetPath}`);
     return { component, status: "installed", message: `Settings merged into ${targetPath}`, verifyPassed: true };
@@ -50,7 +52,7 @@ async function deploySettings(env: DetectedEnvironment, dryRun: boolean): Promis
   }
 }
 
-async function deployClaudeMd(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
+async function deployClaudeMd(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "claude-md";
   const sourcePath = join(getConfigsDir(), templateDir(env), "CLAUDE.md");
   const targetPath = join(env.claudeDir, "CLAUDE.md");
@@ -65,14 +67,16 @@ async function deployClaudeMd(env: DetectedEnvironment, dryRun: boolean): Promis
 
   try {
     await ensureDir(env.claudeDir);
+
+    if (await resolveWrite(targetPath, deployMode) === "skip") {
+      log.info(`Skipped CLAUDE.md (add-on-top: target exists)`);
+      return { component, status: "skipped", message: `CLAUDE.md preserved`, verifyPassed: true };
+    }
     await copyFile(sourcePath, targetPath);
 
-    // Create symlinks, removing stale ones first
     for (const linkPath of [agentsLink, geminiLink]) {
-      const linkExists = await fileExists(linkPath);
-      if (linkExists) {
-        await $`rm -f ${linkPath}`.quiet();
-      }
+      if (await resolveWrite(linkPath, deployMode) === "skip") continue;
+      if (await fileExists(linkPath)) await $`rm -f ${linkPath}`.quiet();
       await symlink("CLAUDE.md", linkPath);
     }
 
@@ -89,8 +93,9 @@ async function deployClaudeMd(env: DetectedEnvironment, dryRun: boolean): Promis
 }
 
 const MANIFEST_NAME = ".code-tools-managed.json";
+const MANIFEST_VERSION = 1;
 
-type DeployManifest = { entries: string[] };
+type DeployManifest = { version?: number; entries: string[] };
 
 async function readManifest(path: string): Promise<string[]> {
   try {
@@ -102,10 +107,10 @@ async function readManifest(path: string): Promise<string[]> {
 }
 
 async function writeManifest(path: string, entries: string[]): Promise<void> {
-  await Bun.write(path, JSON.stringify({ entries: entries.sort() }, null, 2) + "\n");
+  await Bun.write(path, JSON.stringify({ version: MANIFEST_VERSION, entries: entries.sort() }, null, 2) + "\n");
 }
 
-async function deploySkills(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
+async function deploySkills(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "orchestration-skills";
   const src = join(getConfigsDir(), "..", "skills");
   const dst = join(env.claudeDir, "skills");
@@ -129,18 +134,24 @@ async function deploySkills(env: DetectedEnvironment, dryRun: boolean): Promise<
       await $`rm -rf ${join(dst, name)}`.quiet();
     }
 
+    const previousSet = new Set(previous);
+    let skipped = 0;
     for (const name of current) {
-      const skillSrc = join(src, name);
       const skillDst = join(dst, name);
+      if (!previousSet.has(name) && await resolveWrite(skillDst, deployMode) === "skip") {
+        skipped++;
+        continue;
+      }
       await $`rm -rf ${skillDst}`.quiet();
-      await copyDir(skillSrc, skillDst);
+      await copyDir(join(src, name), skillDst);
     }
 
-    await writeManifest(manifestPath, current);
+    await writeManifest(manifestPath, current.filter((n) => previousSet.has(n) || skipped === 0));
 
     const removedMsg = stale.length > 0 ? `, removed ${stale.length} stale (${stale.join(", ")})` : "";
-    log.success(`Deployed ${current.length} skill(s) to ${dst}${removedMsg}`);
-    return { component, status: "installed", message: `${current.length} skills deployed${removedMsg}`, verifyPassed: true };
+    const skipMsg = skipped > 0 ? `, skipped ${skipped} (user-owned collision)` : "";
+    log.success(`Deployed ${current.length - skipped} skill(s) to ${dst}${removedMsg}${skipMsg}`);
+    return { component, status: "installed", message: `${current.length - skipped} skills deployed${removedMsg}${skipMsg}`, verifyPassed: true };
   } catch (err) {
     return {
       component,
@@ -151,7 +162,7 @@ async function deploySkills(env: DetectedEnvironment, dryRun: boolean): Promise<
   }
 }
 
-async function deployCommands(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
+async function deployCommands(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "user-commands";
   const src = join(getConfigsDir(), "..", "commands");
   const dst = join(env.claudeDir, "commands");
@@ -175,15 +186,23 @@ async function deployCommands(env: DetectedEnvironment, dryRun: boolean): Promis
       await $`rm -f ${join(dst, name)}`.quiet();
     }
 
+    const previousSet = new Set(previous);
+    let skipped = 0;
     for (const name of current) {
-      await copyFile(join(src, name), join(dst, name));
+      const target = join(dst, name);
+      if (!previousSet.has(name) && await resolveWrite(target, deployMode) === "skip") {
+        skipped++;
+        continue;
+      }
+      await copyFile(join(src, name), target);
     }
 
     await writeManifest(manifestPath, current);
 
     const removedMsg = stale.length > 0 ? `, removed ${stale.length} stale (${stale.join(", ")})` : "";
-    log.success(`Deployed ${current.length} slash command(s) to ${dst}${removedMsg}`);
-    return { component, status: "installed", message: `${current.length} user commands deployed${removedMsg}`, verifyPassed: true };
+    const skipMsg = skipped > 0 ? `, skipped ${skipped} (user-owned collision)` : "";
+    log.success(`Deployed ${current.length - skipped} slash command(s) to ${dst}${removedMsg}${skipMsg}`);
+    return { component, status: "installed", message: `${current.length - skipped} user commands deployed${removedMsg}${skipMsg}`, verifyPassed: true };
   } catch (err) {
     return {
       component,
@@ -194,7 +213,7 @@ async function deployCommands(env: DetectedEnvironment, dryRun: boolean): Promis
   }
 }
 
-async function deployAgents(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
+async function deployAgents(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "user-agents";
   const src = join(getConfigsDir(), "..", "agents");
   const dst = join(env.claudeDir, "agents");
@@ -218,15 +237,23 @@ async function deployAgents(env: DetectedEnvironment, dryRun: boolean): Promise<
       await $`rm -f ${join(dst, name)}`.quiet();
     }
 
+    const previousSet = new Set(previous);
+    let skipped = 0;
     for (const name of current) {
-      await copyFile(join(src, name), join(dst, name));
+      const target = join(dst, name);
+      if (!previousSet.has(name) && await resolveWrite(target, deployMode) === "skip") {
+        skipped++;
+        continue;
+      }
+      await copyFile(join(src, name), target);
     }
 
     await writeManifest(manifestPath, current);
 
     const removedMsg = stale.length > 0 ? `, removed ${stale.length} stale (${stale.join(", ")})` : "";
-    log.success(`Deployed ${current.length} subagent(s) to ${dst}${removedMsg}`);
-    return { component, status: "installed", message: `${current.length} user agents deployed${removedMsg}`, verifyPassed: true };
+    const skipMsg = skipped > 0 ? `, skipped ${skipped} (user-owned collision)` : "";
+    log.success(`Deployed ${current.length - skipped} subagent(s) to ${dst}${removedMsg}${skipMsg}`);
+    return { component, status: "installed", message: `${current.length - skipped} user agents deployed${removedMsg}${skipMsg}`, verifyPassed: true };
   } catch (err) {
     return {
       component,
@@ -237,7 +264,7 @@ async function deployAgents(env: DetectedEnvironment, dryRun: boolean): Promise<
   }
 }
 
-async function deployHooks(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
+async function deployHooks(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "claude-hooks";
   const hooksSourceDir = isLocalScope(env)
     ? join(getConfigsDir(), "project-claude", "hooks")
@@ -252,7 +279,7 @@ async function deployHooks(env: DetectedEnvironment, dryRun: boolean): Promise<I
   const stale = previous.filter((name) => !hookFiles.includes(name));
 
   if (dryRun) {
-    log.info(`[dry-run] Would deploy ${hookFiles.length} hook(s) to ${hooksTargetDir} with chmod 700`);
+    log.info(`[dry-run] Would deploy ${hookFiles.length} hook(s) to ${hooksTargetDir} with chmod 755`);
     if (stale.length > 0) log.info(`[dry-run] Would remove ${stale.length} stale hook(s): ${stale.join(", ")}`);
     return { component, status: "skipped", message: `[dry-run] Would deploy ${hookFiles.length} hooks, remove ${stale.length} stale`, verifyPassed: false };
   }
@@ -264,13 +291,19 @@ async function deployHooks(env: DetectedEnvironment, dryRun: boolean): Promise<I
       await $`rm -f ${join(hooksTargetDir, name)}`.quiet();
     }
 
+    const previousHookSet = new Set(previous);
+    let skippedHooks = 0;
     for (const hookFile of hookFiles) {
       const src = join(hooksSourceDir, hookFile);
       const dest = join(hooksTargetDir, hookFile);
+      if (!previousHookSet.has(hookFile) && await resolveWrite(dest, deployMode) === "skip") {
+        skippedHooks++;
+        continue;
+      }
       await copyFile(src, dest);
-      await $`chmod 700 ${dest}`.quiet();
+      await $`chmod 755 ${dest}`.quiet();
     }
-    await $`chmod 700 ${hooksTargetDir}`.quiet();
+    await $`chmod 755 ${hooksTargetDir}`.quiet();
     await writeManifest(manifestPath, hookFiles);
 
     const settingsPath = join(env.claudeDir, "settings.json");
@@ -356,10 +389,12 @@ async function deployHooks(env: DetectedEnvironment, dryRun: boolean): Promise<I
       hooksConfig.TeammateIdle = [{ hooks: [cmd("teammate-idle.sh")] }];
     }
 
+    await resolveMerge(settingsPath, ["hooks"], deployMode);
     await mergeJsonFile(settingsPath, { hooks: hooksConfig });
 
-    log.success(`Deployed ${hookFiles.length} hook scripts and wired them into settings.json`);
-    return { component, status: "installed", message: `${hookFiles.length} hook scripts deployed and wired`, verifyPassed: true };
+    const skipMsg = skippedHooks > 0 ? `, skipped ${skippedHooks} (user-owned collision)` : "";
+    log.success(`Deployed ${hookFiles.length - skippedHooks} hook scripts and wired them into settings.json${skipMsg}`);
+    return { component, status: "installed", message: `${hookFiles.length - skippedHooks} hook scripts deployed and wired${skipMsg}`, verifyPassed: true };
   } catch (error) {
     return {
       component,
@@ -439,7 +474,7 @@ async function installStarship(env: DetectedEnvironment, dryRun: boolean): Promi
       : {
           name: "starship",
           displayName: "starship",
-          curl: "curl -sS https://starship.rs/install.sh | sh -s -- -y",
+          curl: "curl --connect-timeout 15 --max-time 120 -sS https://starship.rs/install.sh | sh -s -- -y",
         };
 
   const binResult = await installBinary(pkg, env, dryRun);
@@ -481,7 +516,7 @@ async function installMise(env: DetectedEnvironment, dryRun: boolean): Promise<I
     {
       name: "mise",
       displayName: "mise",
-      curl: "curl https://mise.run | sh",
+      curl: "curl --connect-timeout 15 --max-time 120 https://mise.run | sh",
     },
     env,
     dryRun
@@ -503,7 +538,7 @@ async function installJust(env: DetectedEnvironment, dryRun: boolean): Promise<I
       apt: "sudo apt-get install -y just",
       pacman: "sudo pacman -S --noconfirm just",
       dnf: "sudo dnf install -y just",
-      curl: "curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin",
+      curl: "curl --connect-timeout 15 --max-time 120 --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin",
     },
     env,
     dryRun
@@ -621,7 +656,11 @@ async function createLessons(_env: DetectedEnvironment, dryRun: boolean): Promis
 
 // --- Main export ---
 
-export async function installPrimordial(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult[]> {
+export async function installPrimordial(
+  env: DetectedEnvironment,
+  dryRun: boolean,
+  deployMode?: DeployMode,
+): Promise<InstallResult[]> {
   const local = isLocalScope(env);
 
   const backupPaths = local
@@ -638,13 +677,13 @@ export async function installPrimordial(env: DetectedEnvironment, dryRun: boolea
   const results: InstallResult[] = [];
 
   try {
-    results.push(await deploySettings(env, dryRun));
-    results.push(await deployClaudeMd(env, dryRun));
-    results.push(await deployHooks(env, dryRun));
+    results.push(await deploySettings(env, dryRun, deployMode));
+    results.push(await deployClaudeMd(env, dryRun, deployMode));
+    results.push(await deployHooks(env, dryRun, deployMode));
     if (!local) {
-      results.push(await deploySkills(env, dryRun));
-      results.push(await deployCommands(env, dryRun));
-      results.push(await deployAgents(env, dryRun));
+      results.push(await deploySkills(env, dryRun, deployMode));
+      results.push(await deployCommands(env, dryRun, deployMode));
+      results.push(await deployAgents(env, dryRun, deployMode));
       results.push(await installJq(env, dryRun));
       results.push(await installTmux(env, dryRun));
       results.push(await installStarship(env, dryRun));

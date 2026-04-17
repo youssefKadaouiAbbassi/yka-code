@@ -1,6 +1,9 @@
 {
-  "name": "code-tools-setup",
-  "description": "Interactive installer for the Ultimate Claude Code System v12",
+  "name": "code-tools",
+  "description": "Ultimate Claude Code harness — 17 skills, 3 agents, /do command, 19 hooks",
   "version": "0.1.0",
-  "skills": ["skills/setup/SKILL.md"]
+  "author": { "name": "Youssef Kadaoui Abbassi" },
+  "homepage": "https://github.com/youssefKadaouiAbbassi/code-tools",
+  "repository": "https://github.com/youssefKadaouiAbbassi/code-tools",
+  "license": "MIT"
 }

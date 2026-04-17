@@ -62,10 +62,11 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
     if (!commandExists("uv")) {
       log.info("uv not found, installing uv...");
       if (dryRun) {
-        log.info("[dry-run] Would run: curl -LsSf https://astral.sh/uv/install.sh | sh");
+        log.info("[dry-run] Would run: curl --max-time 300 -LsSf https://astral.sh/uv/install.sh | sh");
       } else {
         try {
-          await $`sh -c "curl -LsSf https://astral.sh/uv/install.sh | sh"`;
+          await $`sh -c "curl --max-time 300 -LsSf https://astral.sh/uv/install.sh | sh"`;
+          process.env.PATH = `${env.homeDir}/.cargo/bin:${env.homeDir}/.local/bin:${process.env.PATH ?? ""}`;
           log.success("uv installed");
         } catch (err) {
           results.push({
@@ -95,7 +96,7 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
         verifyPassed: false,
       });
     } else {
-      await $`sh -c "uv tool install -p 3.13 serena-agent@latest --prerelease=allow"`;
+      await $`sh -c 'export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"; uv tool install -p 3.13 serena-agent@latest --prerelease=allow'`;
       // serena-agent package installs binary as 'serena'
       const installed = commandExists("serena") || commandExists("serena-agent");
       results.push({

@@ -194,22 +194,36 @@ async function createManifest(backupPath: string, timestamp: string, targetDir: 
   };
 }
 
+const CODE_TOOLS_MANAGED_MCPS = [
+  "serena",
+  "claude-mem",
+  "context-mode",
+  "docfork",
+  "deepwiki",
+  "github",
+  "composio",
+];
+
 async function cleanMcpConfiguration(claudeDir: string): Promise<void> {
   try {
     const listed = await $`claude mcp list`.quiet().nothrow().text();
-    const names: string[] = [];
+    const managed: string[] = [];
+    const userOwned: string[] = [];
     for (const line of listed.split("\n")) {
       const m = line.match(/^([\w.:@-]+):/);
       const name = m?.[1];
-      if (name && !name.startsWith("claude.ai") && !name.startsWith("plugin:")) {
-        names.push(name);
-      }
+      if (!name || name.startsWith("claude.ai") || name.startsWith("plugin:")) continue;
+      if (CODE_TOOLS_MANAGED_MCPS.includes(name)) managed.push(name);
+      else userOwned.push(name);
     }
 
-    for (const name of names) {
+    for (const name of managed) {
       await $`claude mcp remove ${name} -s user`.quiet().nothrow();
     }
-    log.info(`✓ Cleared ${names.length} MCP servers via claude mcp remove`);
+    log.info(`✓ Cleared ${managed.length} code-tools MCP server(s) via claude mcp remove`);
+    if (userOwned.length > 0) {
+      log.info(`✓ Preserved ${userOwned.length} user-owned MCP(s): ${userOwned.join(", ")}`);
+    }
   } catch {
     log.info("No MCP servers to clear (or claude CLI unavailable)");
   }
@@ -225,32 +239,37 @@ async function cleanMcpConfiguration(claudeDir: string): Promise<void> {
   } catch { /* no legacy file */ }
 }
 
-async function removePlugins(claudeDir: string): Promise<void> {
-  const pluginsDir = join(claudeDir, "plugins");
+const MANAGED_MANIFEST = ".code-tools-managed.json";
 
+async function readManagedEntries(dir: string): Promise<string[] | null> {
   try {
-    await fs.rm(pluginsDir, { recursive: true, force: true });
-    log.info("✓ Removed all plugins");
+    const raw = await fs.readFile(join(dir, MANAGED_MANIFEST), "utf-8");
+    const data = JSON.parse(raw) as { entries?: string[] };
+    return Array.isArray(data.entries) ? data.entries : [];
   } catch {
-    // Plugins directory doesn't exist
+    return null;
   }
 }
 
-async function removeSkills(claudeDir: string): Promise<void> {
-  const skillsDirs = [
-    join(claudeDir, "skills"),
-    join(claudeDir, "custom-skills"),
-    join(claudeDir, "user-skills"),
-  ];
-
-  for (const skillsDir of skillsDirs) {
-    try {
-      await fs.rm(skillsDir, { recursive: true, force: true });
-    } catch {
-      // Directory doesn't exist
-    }
+async function removeManagedEntries(dir: string, label: string): Promise<void> {
+  const entries = await readManagedEntries(dir);
+  if (entries === null) {
+    log.info(`✓ Preserved ${dir} (no ${MANAGED_MANIFEST} — treating as user-owned)`);
+    return;
   }
-  log.info("✓ Removed all custom skills");
+  for (const name of entries) {
+    await fs.rm(join(dir, name), { recursive: true, force: true });
+  }
+  await fs.rm(join(dir, MANAGED_MANIFEST), { force: true });
+  log.info(`✓ Removed ${entries.length} managed ${label}`);
+}
+
+async function removePlugins(claudeDir: string): Promise<void> {
+  await removeManagedEntries(join(claudeDir, "plugins"), "plugin(s)");
+}
+
+async function removeSkills(claudeDir: string): Promise<void> {
+  await removeManagedEntries(join(claudeDir, "skills"), "skill(s)");
 }
 
 async function resetSettings(claudeDir: string): Promise<void> {
@@ -288,14 +307,9 @@ async function resetSettings(claudeDir: string): Promise<void> {
 }
 
 async function cleanHooks(claudeDir: string): Promise<void> {
-  const hooksDir = join(claudeDir, "hooks");
-
-  try {
-    await fs.rm(hooksDir, { recursive: true, force: true });
-    log.info("✓ Removed all custom hooks");
-  } catch {
-    // Hooks directory doesn't exist
-  }
+  await removeManagedEntries(join(claudeDir, "hooks"), "hook(s)");
+  await removeManagedEntries(join(claudeDir, "commands"), "command(s)");
+  await removeManagedEntries(join(claudeDir, "agents"), "agent(s)");
 }
 
 async function clearCaches(claudeDir: string): Promise<void> {

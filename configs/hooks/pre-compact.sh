@@ -20,8 +20,8 @@ transcript="$(printf '%s' "$input" | jq -r '.transcript_path // empty')"
 patterns='(AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36,}|sk-ant-[A-Za-z0-9_-]{40,}|sk_live_[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,})'
 
 if grep -Eqo "$patterns" "$transcript" 2>/dev/null; then
-  printf 'Refusing auto-compact: transcript contains live-looking credential material. Rotate or redact, then /compact manually.\n' >&2
-  exit 2
+  printf '{"decision":"block","reason":"pre-compact: transcript contains live-looking credential material. Rotate or redact, then /compact manually."}\n'
+  exit 0
 fi
 
 exit 0

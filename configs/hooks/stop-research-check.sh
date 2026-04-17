@@ -21,12 +21,7 @@ research_tools='mcp__docfork__search_docs|mcp__docfork__fetch_doc|mcp__deepwiki_
 
 # Find the last user-assistant turn boundary. A turn = from last user message
 # to end of file. Extract tool uses and text content from that slice.
-turn_lines="$(awk '
-  /"role": *"user"/ { start = NR }
-  { last = NR }
-  END { for (i = 1; i <= last; i++) lines[i] = 1; if (start) print start; else print 1 }
-' "$transcript")"
-turn_start="${turn_lines:-1}"
+turn_start="$(awk '/"role": *"user"/ { start = NR } END { print (start ? start : 1) }' "$transcript")"
 
 turn_json="$(sed -n "${turn_start},\$p" "$transcript")"
 

@@ -1,10 +1,10 @@
 /** Per-file manifest backup used by primordial.ts. Layout: ~/.claude-backup/<ts>/<rel-path>. */
-import { mkdir, readdir } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import type { BackupManifest, BackupEntry } from "./types.js";
 import { ensureDir } from "./utils.js";
 
-const BACKUP_BASE = join(Bun.env.HOME ?? "~", ".claude-backup");
+const BACKUP_BASE = Bun.env.CODE_TOOLS_BACKUP_BASE ?? join(Bun.env.HOME ?? "~", ".claude-backup");
 
 function formatTimestamp(date: Date): string {
   const pad = (n: number, len = 2) => String(n).padStart(len, "0");

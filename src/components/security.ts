@@ -37,7 +37,7 @@ export const securityCategory: ComponentCategory = {
           name: "cu",
           displayName: "container-use",
           brew: "brew install dagger/tap/container-use",
-          curl: "curl -fsSL https://dl.dagger.io/container-use/install.sh | sh",
+          curl: "curl --connect-timeout 15 --max-time 300 -fsSL https://dl.dagger.io/container-use/install.sh | sh",
         },
       ],
       verifyCommand: "container-use --version",
@@ -117,11 +117,11 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
         const platform = env.os === "macos" ? "darwin" : "linux";
         cmd =
           `set -e; ` +
-          `LATEST=$(curl -sS https://api.github.com/repos/dagger/container-use/releases/latest | grep tag_name | head -1 | sed 's/.*"\\(v[^"]*\\)".*/\\1/'); ` +
+          `LATEST=$(curl --connect-timeout 15 --max-time 30 -sS https://api.github.com/repos/dagger/container-use/releases/latest | grep tag_name | head -1 | sed 's/.*"\\(v[^"]*\\)".*/\\1/'); ` +
           `URL="https://github.com/dagger/container-use/releases/download/$LATEST/container-use_${'$'}{LATEST}_${platform}_${arch}.tar.gz"; ` +
           `mkdir -p "$HOME/.local/bin"; ` +
           `TMP=$(mktemp -d); ` +
-          `curl -sSL "$URL" | tar -xz -C "$TMP"; ` +
+          `curl --connect-timeout 15 --max-time 300 -sSL "$URL" | tar -xz -C "$TMP"; ` +
           `mv "$TMP/container-use" "$HOME/.local/bin/container-use"; ` +
           `chmod +x "$HOME/.local/bin/container-use"; ` +
           `rm -rf "$TMP"`;

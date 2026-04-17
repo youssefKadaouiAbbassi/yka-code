@@ -22,14 +22,24 @@ import {
   appendToShellRc,
 } from "../utils.js";
 import { performCleanInstall, restoreFromBackup } from "../utils/backup.js";
-import { resolveInstallMode } from "../install-mode.js";
-import { rollbackAddOnTop } from "../add-on-top.js";
+import { resolveInstallMode, type ResolvedInstallMode } from "../install-mode.js";
+import { rollbackAddOnTop, type DeployMode } from "../add-on-top.js";
 import type { DetectedEnvironment, InstallResult, ComponentCategory } from "../types.js";
+
+function toDeployMode(resolved: ResolvedInstallMode): DeployMode {
+  return {
+    mode: resolved.mode,
+    addOnTopLogPath: resolved.addOnTopLogPath,
+    conflictPolicy: resolved.conflictPolicy,
+    claudeDir: resolved.resolvedEnv.claudeDir,
+  };
+}
 
 // Third-party installers can overwrite permissions.deny; re-apply ours last.
 async function reapplyHardenedSettings(env: DetectedEnvironment, dryRun: boolean): Promise<void> {
   if (dryRun) return;
-  const scope = env.claudeDir.startsWith(env.homeDir + "/") ? "home-claude" : "project-claude";
+  const homeNormalized = env.homeDir.replace(/\/+$/, "");
+  const scope = env.claudeDir.startsWith(homeNormalized + "/") ? "home-claude" : "project-claude";
   const sourcePath = join(getConfigsDir(), scope, "settings.json");
   const targetPath = join(env.claudeDir, "settings.json");
   try {
@@ -71,7 +81,7 @@ function handleCancel(): never {
   process.exit(0);
 }
 
-async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment): Promise<void> {
+async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment, deployMode?: DeployMode): Promise<void> {
   clack.intro(
     pc.bold(pc.cyan("Ultimate Claude Code System v12")) + pc.dim(" — Setup")
   );
@@ -102,7 +112,7 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
   // Don't wrap in a spinner: primordial may shell out to package managers (apt/brew/etc)
   // which need stdin/stdout for sudo prompts and progress output.
   log.info("Installing primordial core (you may be prompted for sudo)...");
-  const primordialResults = await installPrimordial(env, dryRun);
+  const primordialResults = await installPrimordial(env, dryRun, deployMode);
   log.success("Primordial core step complete");
 
   if (isLocalScope(env)) {
@@ -404,6 +414,8 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
     }
   }
 
+  if (!dryRun) await recordJournal(env, "all");
+
   clack.outro(
     pc.bold("Setup complete!") + pc.dim(" Restart your terminal to activate.")
   );
@@ -420,11 +432,12 @@ async function runBatch(
   dryRun: boolean,
   tier: string | undefined,
   verbose: boolean,
+  deployMode?: DeployMode,
 ): Promise<void> {
   log.info(`Tier: ${tier ?? "all"}, dry-run: ${dryRun}`);
   log.info(`OS: ${env.os} (${env.arch}), shell: ${env.shell}, pkg: ${env.packageManager}`);
 
-  const primordialResults = await installPrimordial(env, dryRun);
+  const primordialResults = await installPrimordial(env, dryRun, deployMode);
   if (tier === "primordial" || isLocalScope(env)) {
     if (isLocalScope(env)) log.info("Local install complete (category installers skipped — they're user-global).");
     else log.info("Primordial tier complete.");
@@ -475,13 +488,22 @@ async function recordJournal(env: DetectedEnvironment, tier: string | undefined)
   };
 
   const { CORE_PLUGINS } = await import("../components/cc-plugins.js");
+  const { $ } = await import("bun");
+
+  let actuallyInstalled: string[] = [];
+  try {
+    const listed = await $`claude plugin list`.quiet().nothrow().text();
+    actuallyInstalled = CORE_PLUGINS.filter((name) => listed.includes(name));
+  } catch {
+    actuallyInstalled = [];
+  }
 
   await writeJournal({
     version,
     tier: (tier === "primordial" || tier === "recommended" || tier === "all") ? tier : "recommended",
     scope: isLocalScope(env) ? "local" : "global",
     installedAt: new Date().toISOString(),
-    plugins: CORE_PLUGINS.map((name) => ({ name, marketplace: "claude-plugins-official" })),
+    plugins: actuallyInstalled.map((name) => ({ name, marketplace: "claude-plugins-official" })),
     skills: await readDirManifest("skills"),
     commands: await readDirManifest("commands"),
     agents: await readDirManifest("agents"),
@@ -571,7 +593,7 @@ export default defineCommand({
         "non-interactive": args["non-interactive"],
       },
       env,
-      { interactive },
+      { interactive, dryRun },
     );
 
     // --- Two-layer recoverable install wrapper (Phase 3) ---
@@ -580,12 +602,14 @@ export default defineCommand({
         await performCleanInstall(resolved.resolvedEnv.claudeDir);
       }
 
+      const deployMode = toDeployMode(resolved);
+
       if (!interactive || args.tier) {
-        await runBatch(resolved.resolvedEnv, dryRun, args.tier, Boolean(args["non-interactive"]));
+        await runBatch(resolved.resolvedEnv, dryRun, args.tier, Boolean(args["non-interactive"]), deployMode);
         return;
       }
 
-      await runInteractive(dryRun, resolved.resolvedEnv);
+      await runInteractive(dryRun, resolved.resolvedEnv, deployMode);
     } catch (err) {
       log.error(`Install failed: ${err instanceof Error ? err.message : String(err)}`);
       if (resolved.backupPath) {

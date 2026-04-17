@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/pre-secrets-guard.sh" }] },
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/pre-destructive-blocker.sh" }] },
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/pre-pr-gate.sh" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/post-lint-gate.sh" }] },
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/project-claude/hooks/post-bash-test.sh" }] }
+    ],
+    "SessionStart": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/session-start.sh" }] }],
+    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/session-end.sh" }] }],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/stop-summary.sh" }] },
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/stop-research-check.sh" }] }
+    ],
+    "PreCompact": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/pre-compact.sh" }] }],
+    "PostCompact": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/post-compact.sh" }] }],
+    "StopFailure": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/stop-failure.sh" }] }],
+    "PermissionDenied": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/permission-denied.sh" }] }],
+    "CwdChanged": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/cwd-changed.sh" }] }],
+    "Elicitation": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/elicitation.sh" }] }],
+    "FileChanged": [{ "matcher": "\\.env|\\.env\\.local|\\.mcp\\.json|settings\\.local\\.json", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/file-changed.sh" }] }],
+    "TaskCreated": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/task-created.sh" }] }],
+    "TaskCompleted": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/task-completed.sh" }] }],
+    "TeammateIdle": [{ "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/teammate-idle.sh" }] }]
+  }
+}

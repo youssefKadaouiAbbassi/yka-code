@@ -25,7 +25,7 @@ export const workflowCategory: ComponentCategory = {
         url: "https://backend.composio.dev/v3/mcp/${COMPOSIO_MCP_SERVER_ID}?user_id=${COMPOSIO_USER_ID}",
         headers: { "x-api-key": "${COMPOSIO_API_KEY}" },
       },
-      verifyCommand: "echo composio-mcp-config",
+      verifyCommand: "claude mcp list | grep -q '^composio:'",
     },
   ],
 };
@@ -60,7 +60,7 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
           auth_config_ids: [],
           no_auth_apps: ["composio"],
         });
-        const resp = await $`curl -sS -X POST https://backend.composio.dev/api/v3/mcp/servers -H ${"x-api-key: " + key} -H ${"Content-Type: application/json"} -d ${body}`.quiet().text();
+        const resp = await $`curl --connect-timeout 15 --max-time 30 -sS -X POST https://backend.composio.dev/api/v3/mcp/servers -H ${"x-api-key: " + key} -H ${"Content-Type: application/json"} -d ${body}`.quiet().text();
         let parsed: { id?: string; error?: string } = {};
         try {
           parsed = JSON.parse(resp);

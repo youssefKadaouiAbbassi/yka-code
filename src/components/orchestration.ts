@@ -92,7 +92,7 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
     } else {
       if (!commandExists("multica") || !await fs.stat(serverDir).then(() => true).catch(() => false)) {
         log.info("Running upstream multica install.sh --with-server …");
-        const installScript = "curl -fsSL https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.sh | bash -s -- --with-server";
+        const installScript = "curl --connect-timeout 15 --max-time 300 -fsSL https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.sh | bash -s -- --with-server";
         await $`sh -c ${installScript}`.nothrow();
       } else {
         log.info("multica CLI + server already present, skipping install.sh");
@@ -114,7 +114,7 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
         }
       }
 
-      const setupOut = await $`sh -c ${`yes | multica setup self-host --port ${backendPort} --frontend-port ${frontendPort}`}`.nothrow().text();
+      const setupOut = await $`sh -c ${`yes | multica setup self-host --port ${backendPort} --frontend-port ${frontendPort} 2>&1`}`.nothrow().text();
       const loginLine = setupOut.split("\n").find((l) => l.includes("/login?cli_callback="))?.trim() ?? "";
       const alreadyAuthed = /Authenticated as/.test(setupOut);
       const installed = commandExists("multica");

@@ -117,8 +117,5 @@
       "Read(**/.env.*)"
     ]
   },
-  "effortLevel": "medium",
-  "env": {
-    "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "0"
-  }
+  "effortLevel": "medium"
 }

@@ -13,7 +13,9 @@ async function wireClaudeHudStatusline(env: DetectedEnvironment): Promise<{ wire
       if (settings.statusLine?.command?.includes("claude-hud")) {
         return { wired: false, message: "statusLine already configured" };
       }
-    } catch { }
+    } catch (err) {
+      return { wired: false, message: `settings.json unreadable — skipping statusline wire-up (manually fix: ${settingsPath}): ${err instanceof Error ? err.message : String(err)}` };
+    }
   }
 
   const pluginRoot = join(env.claudeDir, "plugins", "cache", "claude-hud", "claude-hud");
@@ -96,7 +98,7 @@ export const memoryContextCategory: ComponentCategory = {
         command: "claude-mem",
         args: ["--bind", "127.0.0.1"],
       },
-      verifyCommand: "echo claude-mem-mcp-config",
+      verifyCommand: "claude mcp list | grep -q '^claude-mem:'",
     },
     {
       id: 13,
@@ -112,7 +114,7 @@ export const memoryContextCategory: ComponentCategory = {
         command: "npx",
         args: ["-y", "context-mode"],
       },
-      verifyCommand: "echo context-mode-mcp-config",
+      verifyCommand: "claude mcp list | grep -q '^context-mode:'",
     },
     {
       id: 14,

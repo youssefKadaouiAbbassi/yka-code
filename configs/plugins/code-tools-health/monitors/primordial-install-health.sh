@@ -30,7 +30,7 @@ done
 settings="${claude_dir}/settings.json"
 if [[ -f "$settings" ]] && command -v jq >/dev/null 2>&1; then
   scrub=$(jq -r '.env.CLAUDE_CODE_SUBPROCESS_ENV_SCRUB // "unset"' "$settings" 2>/dev/null)
-  [[ "$scrub" == "1" ]] || printf 'drift: CLAUDE_CODE_SUBPROCESS_ENV_SCRUB not set to "1" in settings.json\n'
+  [[ "$scrub" == "0" ]] && printf 'drift: CLAUDE_CODE_SUBPROCESS_ENV_SCRUB explicitly set to "0" — leaks secrets to Bash subprocesses\n'
 fi
 
 if command -v claude >/dev/null 2>&1; then

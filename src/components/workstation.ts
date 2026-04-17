@@ -23,7 +23,7 @@ export const workstationCategory: ComponentCategory = {
           displayName: "Ghostty",
           brew: "brew install --cask ghostty",
           pacman: "sudo pacman -S --noconfirm ghostty",
-          curl: "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)\"",
+          curl: "/bin/bash -c \"$(curl --connect-timeout 15 --max-time 120 -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)\"",
         },
       ],
       verifyCommand: "ghostty --version",
@@ -56,7 +56,7 @@ export const workstationCategory: ComponentCategory = {
           name: "chezmoi",
           displayName: "chezmoi",
           brew: "brew install chezmoi",
-          curl: "BINDIR=\"$HOME/.local/bin\" sh -c \"$(curl -sfL get.chezmoi.io)\" -- -b \"$HOME/.local/bin\"",
+          curl: "BINDIR=\"$HOME/.local/bin\" sh -c \"$(curl --connect-timeout 15 --max-time 120 -sfL get.chezmoi.io)\" -- -b \"$HOME/.local/bin\"",
         },
       ],
       verifyCommand: "chezmoi --version",
@@ -143,7 +143,7 @@ export async function install(
       log.info("Installing Ghostty via community Ubuntu installer (will prompt for sudo)...");
       const scriptPath = `/tmp/ghostty-install-${Date.now()}.sh`;
       const scriptUrl = "https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh";
-      const fetched = await $`curl -fsSL ${scriptUrl} -o ${scriptPath}`.nothrow();
+      const fetched = await $`curl --connect-timeout 15 --max-time 120 -fsSL ${scriptUrl} -o ${scriptPath}`.nothrow();
       let installed = false;
       let ranExitCode: number | undefined;
       if (fetched.exitCode === 0) {
@@ -270,36 +270,33 @@ export async function install(
         message: "[dry-run] Would install age",
         verifyPassed: false,
       });
-    } else if (env.packageManager === "brew") {
-      await $`sh -c "brew install age"`;
-      const installed = commandExists("age");
-      results.push({
-        component: "age",
-        status: installed ? "installed" : "failed",
-        message: installed ? "age installed successfully" : "age install ran but binary not found",
-        verifyPassed: installed,
-      });
     } else {
-      const arch = env.arch === "arm64" ? "arm64" : "amd64";
-      const cmd =
-        `set -e; ` +
-        `LATEST=$(curl -sS https://api.github.com/repos/FiloSottile/age/releases/latest | grep tag_name | head -1 | sed 's/.*"\\(v[^"]*\\)".*/\\1/'); ` +
-        `URL="https://github.com/FiloSottile/age/releases/download/$LATEST/age-${'$'}{LATEST}-linux-${arch}.tar.gz"; ` +
-        `mkdir -p "$HOME/.local/bin"; ` +
-        `TMP=$(mktemp -d); ` +
-        `curl -sSL "$URL" | tar -xz -C "$TMP"; ` +
-        `mv "$TMP/age/age" "$HOME/.local/bin/age"; ` +
-        `mv "$TMP/age/age-keygen" "$HOME/.local/bin/age-keygen"; ` +
-        `chmod +x "$HOME/.local/bin/age" "$HOME/.local/bin/age-keygen"; ` +
-        `rm -rf "$TMP"`;
-      await $`sh -c ${cmd}`.nothrow();
-      const installed = commandExists("age");
-      results.push({
-        component: "age",
-        status: installed ? "installed" : "failed",
-        message: installed ? "age installed successfully" : "age install ran but binary not found",
-        verifyPassed: installed,
-      });
+      const agePkg = workstationCategory.components[3].packages[0];
+      if (env.packageManager === "apt" || env.packageManager === "pacman" || env.packageManager === "dnf" || env.packageManager === "brew") {
+        const result = await installBinary(agePkg, env, dryRun);
+        results.push(result);
+      } else {
+        const arch = env.arch === "arm64" ? "arm64" : "amd64";
+        const cmd =
+          `set -e; ` +
+          `LATEST=$(curl --connect-timeout 15 --max-time 30 -sS https://api.github.com/repos/FiloSottile/age/releases/latest | grep tag_name | head -1 | sed 's/.*"\\(v[^"]*\\)".*/\\1/'); ` +
+          `URL="https://github.com/FiloSottile/age/releases/download/$LATEST/age-${'$'}{LATEST}-linux-${arch}.tar.gz"; ` +
+          `mkdir -p "$HOME/.local/bin"; ` +
+          `TMP=$(mktemp -d); ` +
+          `curl --connect-timeout 15 --max-time 300 -sSL "$URL" | tar -xz -C "$TMP"; ` +
+          `mv "$TMP/age/age" "$HOME/.local/bin/age"; ` +
+          `mv "$TMP/age/age-keygen" "$HOME/.local/bin/age-keygen"; ` +
+          `chmod +x "$HOME/.local/bin/age" "$HOME/.local/bin/age-keygen"; ` +
+          `rm -rf "$TMP"`;
+        await $`sh -c ${cmd}`.nothrow();
+        const installed = commandExists("age");
+        results.push({
+          component: "age",
+          status: installed ? "installed" : "failed",
+          message: installed ? "age installed successfully" : "age install ran but binary not found",
+          verifyPassed: installed,
+        });
+      }
     }
   } catch (err) {
     results.push({

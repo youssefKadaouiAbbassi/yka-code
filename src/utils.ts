@@ -60,9 +60,27 @@ export function getConfigsDir(): string {
   return join(import.meta.dir, "..", "configs");
 }
 
+const HOOK_EVENT_KEYS = new Set([
+  "PreToolUse", "PostToolUse", "SessionStart", "SessionEnd",
+  "Stop", "StopFailure", "PreCompact", "PostCompact",
+  "PermissionDenied", "CwdChanged", "Elicitation", "FileChanged",
+  "TaskCreated", "TaskCompleted", "TeammateIdle", "Notification",
+]);
+
 export const mergeSettings = deepmergeCustom({
   mergeArrays: (values, _utils, meta) => {
     if (meta?.key === "deny") return [...new Set(values.flat())];
+    if (typeof meta?.key === "string" && HOOK_EVENT_KEYS.has(meta.key)) {
+      const seen = new Set<string>();
+      const merged: unknown[] = [];
+      for (const entry of values.flat()) {
+        const fingerprint = JSON.stringify(entry);
+        if (seen.has(fingerprint)) continue;
+        seen.add(fingerprint);
+        merged.push(entry);
+      }
+      return merged;
+    }
     return values[values.length - 1];
   },
   mergeRecords: (values, utils, meta) => {

@@ -99,10 +99,11 @@ async function confirmDestructive(claudeDir: string): Promise<boolean> {
 export async function resolveInstallMode(
   args: ResolveInstallModeArgs,
   env: DetectedEnvironment,
-  opts: { interactive: boolean; cwd?: string },
+  opts: { interactive: boolean; cwd?: string; dryRun?: boolean },
 ): Promise<ResolvedInstallMode> {
   const cwd = opts.cwd ?? process.cwd();
   const home = env.homeDir || homedir();
+  const dryRun = opts.dryRun ?? false;
 
   // Interactive scope selection when neither --global nor --local is specified
   let useLocal = args.local;
@@ -175,7 +176,7 @@ export async function resolveInstallMode(
 
   // --- add-on-top branch ---
   if (args["add-on-top"]) {
-    const addOnTopLogPath = await initAddOnTopLog(claudeDir, conflictPolicy);
+    const addOnTopLogPath = await initAddOnTopLog(claudeDir, conflictPolicy, dryRun);
     return { mode: "add-on-top", resolvedEnv, conflictPolicy, addOnTopLogPath };
   }
 
@@ -189,7 +190,7 @@ export async function resolveInstallMode(
     console.error(pc.yellow(
       "Warning: existing install detected but no --clean-install or --add-on-top specified. Defaulting to --add-on-top.",
     ));
-    const addOnTopLogPath = await initAddOnTopLog(claudeDir, conflictPolicy);
+    const addOnTopLogPath = await initAddOnTopLog(claudeDir, conflictPolicy, dryRun);
     return { mode: "add-on-top", resolvedEnv, conflictPolicy, addOnTopLogPath };
   }
 
@@ -222,16 +223,22 @@ export async function resolveInstallMode(
     return { mode: "clean", resolvedEnv, backupPath: result.backupPath, conflictPolicy };
   }
 
-  const addOnTopLogPath = await initAddOnTopLog(claudeDir, conflictPolicy);
-  return { mode: "add-on-top", resolvedEnv, conflictPolicy, addOnTopLogPath };
+  const addOnTopLogPath = await initAddOnTopLog(claudeDir, conflictPolicy, dryRun);
+  return { mode: "add-on-top", resolvedEnv, conflictPolicy, addOnTopLogPath: dryRun ? undefined : addOnTopLogPath };
 }
 
 async function initAddOnTopLog(
   claudeDir: string,
   conflictPolicy: ConflictPolicy,
+  dryRun: boolean,
 ): Promise<string> {
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const writelogDir = join(claudeDir, `.omc-addontop-${timestamp}`);
+
+  if (dryRun) {
+    log.info(`[dry-run] Would create add-on-top writelog at ${writelogDir}`);
+    return writelogDir;
+  }
 
   try {
     await fs.mkdir(writelogDir, { recursive: true });
@@ -240,7 +247,6 @@ async function initAddOnTopLog(
       join(writelogDir, "manifest.json"),
       JSON.stringify({ timestamp, claudeDir, conflictPolicy }, null, 2),
     );
-    // Initialize empty writelog
     await fs.writeFile(join(writelogDir, "writelog.jsonl"), "");
   } catch (err) {
     log.warn(`Could not initialize add-on-top writelog: ${err instanceof Error ? err.message : String(err)}`);

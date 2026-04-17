@@ -1,6 +1,6 @@
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
-import { mkdir } from "node:fs/promises";
+import { mkdir, rename, writeFile } from "node:fs/promises";
 import { fileExists } from "./utils.js";
 
 export type InstallJournal = {
@@ -16,7 +16,7 @@ export type InstallJournal = {
 };
 
 export function getJournalPath(): string {
-  return join(homedir(), ".config", "code-tools", "install.json");
+  return process.env.CODE_TOOLS_JOURNAL_PATH ?? join(homedir(), ".config", "code-tools", "install.json");
 }
 
 export async function readJournal(): Promise<InstallJournal | null> {
@@ -31,8 +31,10 @@ export async function readJournal(): Promise<InstallJournal | null> {
 
 export async function writeJournal(journal: InstallJournal): Promise<void> {
   const path = getJournalPath();
+  const tmpPath = `${path}.tmp-${process.pid}`;
   await mkdir(dirname(path), { recursive: true });
-  await Bun.write(path, JSON.stringify(journal, null, 2) + "\n");
+  await writeFile(tmpPath, JSON.stringify(journal, null, 2) + "\n", { flag: "w" });
+  await rename(tmpPath, path);
 }
 
 export function diffJournals(prev: InstallJournal | null, next: InstallJournal): {

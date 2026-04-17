@@ -39,12 +39,26 @@ deny() {
 
 git rev-parse --is-inside-work-tree &>/dev/null || exit 0
 
-# Check 1: pushing to the default branch
+# Check 1: pushing to the default branch.
+# Prefer the repo's canonical default (origin/HEAD); if unset, try to resolve it once,
+# then fall back to blocking pushes to any common default-branch name.
 default_branch="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || true)"
-[[ -z "$default_branch" ]] && default_branch="$(git config --get init.defaultBranch 2>/dev/null || printf 'main')"
+if [[ -z "$default_branch" ]]; then
+  git remote set-head origin --auto &>/dev/null || true
+  default_branch="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || true)"
+fi
 current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf '')"
 
-if [[ $is_push -eq 1 && "$current_branch" == "$default_branch" ]]; then
+common_defaults='main master develop trunk'
+is_default=0
+[[ -n "$default_branch" && "$current_branch" == "$default_branch" ]] && is_default=1
+if [[ $is_default -eq 0 ]]; then
+  for b in $common_defaults; do
+    [[ "$current_branch" == "$b" ]] && { is_default=1; default_branch="$b"; break; }
+  done
+fi
+
+if [[ $is_push -eq 1 && $is_default -eq 1 ]]; then
   deny "pre-pr-gate: refusing to push directly to default branch '${default_branch}'. Create a feature branch first."
 fi
 
