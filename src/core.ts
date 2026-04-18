@@ -16,15 +16,9 @@ import {
 import { createBackup, restoreFromPartialManifest } from "./backup.js";
 import { resolveWrite, resolveMerge, type DeployMode } from "./add-on-top.js";
 import { buildHooksConfig } from "./hook-registry.js";
+import { isLocalScope, templateDir } from "./scope.js";
 
-export function isLocalScope(env: DetectedEnvironment): boolean {
-  const home = env.homeDir.replace(/\/+$/, "");
-  return !env.claudeDir.startsWith(home + "/");
-}
-
-export function templateDir(env: DetectedEnvironment): "home-claude" | "project-claude" {
-  return isLocalScope(env) ? "project-claude" : "home-claude";
-}
+export { isLocalScope, templateDir };
 
 async function deploySettings(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "claude-settings";
