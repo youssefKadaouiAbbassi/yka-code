@@ -7,7 +7,9 @@ import { installCategory } from "../../components/index.js";
 import { log, mergeJsonFile, getConfigsDir } from "../../utils.js";
 import { writeJournal } from "../../install-journal.js";
 import { CORE_PLUGINS } from "../../packages.js";
-import type { DeployMode } from "../../add-on-top.js";
+import { restoreFromBackup } from "../../utils/backup.js";
+import { rollbackAddOnTop, type DeployMode } from "../../add-on-top.js";
+import type { ResolvedInstallMode } from "../../install-mode.js";
 import type { DetectedEnvironment, InstallResult, ComponentCategory } from "../../types.js";
 
 export interface ExecuteInstallsResult {
@@ -66,6 +68,34 @@ export async function reapplyHardenedSettings(env: DetectedEnvironment, dryRun: 
   } catch (err) {
     log.warn(`Could not re-apply hardened settings: ${err instanceof Error ? err.message : String(err)}`);
   }
+}
+
+export async function handleInstallFailure(err: unknown, resolved: ResolvedInstallMode): Promise<never> {
+  log.error(`Install failed: ${err instanceof Error ? err.message : String(err)}`);
+  if (resolved.backupPath) {
+    log.info("Attempting automatic rollback from full-tree backup...");
+    try {
+      await restoreFromBackup(resolved.backupPath, resolved.resolvedEnv.claudeDir);
+      log.info("✓ Rollback complete. Original state restored.");
+      process.exit(1);
+    } catch (rollbackErr) {
+      log.error(`Rollback failed: ${rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr)}`);
+      log.error(`Manual recovery: run ${resolved.backupPath}/restore.sh`);
+      process.exit(2);
+    }
+  } else if (resolved.addOnTopLogPath) {
+    log.info("Attempting add-on-top rollback via write log...");
+    try {
+      await rollbackAddOnTop(resolved.addOnTopLogPath);
+      log.info("✓ Add-on-top rollback complete.");
+      process.exit(1);
+    } catch (rollbackErr) {
+      log.error(`Add-on-top rollback failed: ${rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr)}`);
+      log.error(`Write log location: ${resolved.addOnTopLogPath}`);
+      process.exit(2);
+    }
+  }
+  process.exit(1);
 }
 
 export async function recordJournal(env: DetectedEnvironment, tier: string | undefined): Promise<void> {

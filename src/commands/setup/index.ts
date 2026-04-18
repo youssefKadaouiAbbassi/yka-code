@@ -1,32 +1,33 @@
 import { defineCommand } from "citty";
 import * as clack from "@clack/prompts";
 import pc from "picocolors";
-import { detectEnvironment } from "../detect.js";
-import { isLocalScope } from "../scope.js";
-import { verifyAll } from "../verify.js";
+import { detectEnvironment } from "../../detect.js";
+import { isLocalScope } from "../../scope.js";
+import { verifyAll } from "../../verify.js";
 import {
   selectInteractive,
   pickCategoriesForTier,
-} from "./setup/select-categories.js";
+} from "./select-categories.js";
 import {
   installCoreStep,
   installCategories,
   reapplyHardenedSettings,
   recordJournal,
-} from "./setup/execute-installs.js";
+  handleInstallFailure,
+} from "./execute-installs.js";
 import {
   formatEnvLine,
   renderLocalScopeSummary,
   renderInstallSummary,
   renderRestartHints,
   renderManualSteps,
-} from "./setup/summarize-results.js";
-import { promptForMcpKeys } from "./setup/mcp-keys.js";
-import { log } from "../utils.js";
-import { performCleanInstall, restoreFromBackup } from "../utils/backup.js";
-import { resolveInstallMode, type ResolvedInstallMode } from "../install-mode.js";
-import { rollbackAddOnTop, type DeployMode } from "../add-on-top.js";
-import type { DetectedEnvironment } from "../types.js";
+} from "./summarize-results.js";
+import { promptForMcpKeys } from "./mcp-keys.js";
+import { log } from "../../utils.js";
+import { performCleanInstall } from "../../utils/backup.js";
+import { resolveInstallMode, type ResolvedInstallMode } from "../../install-mode.js";
+import type { DeployMode } from "../../add-on-top.js";
+import type { DetectedEnvironment } from "../../types.js";
 
 function toDeployMode(resolved: ResolvedInstallMode): DeployMode {
   return {
@@ -38,20 +39,14 @@ function toDeployMode(resolved: ResolvedInstallMode): DeployMode {
 }
 
 async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment, deployMode?: DeployMode): Promise<void> {
-  clack.intro(
-    pc.bold(pc.cyan("yka-code")) + pc.dim(" — Setup")
-  );
+  clack.intro(pc.bold(pc.cyan("yka-code")) + pc.dim(" — Setup"));
 
-  // --- 1. Environment scan ---
   const s = clack.spinner();
   s.start("Scanning your environment...");
   const env = envOverride ?? await detectEnvironment();
   s.stop("Environment detected");
 
-  // --- 2. Show detected environment ---
   clack.note(formatEnvLine(env), "Detected environment");
-
-  // --- 3. Explain core ---
   clack.note(
     [
       "The core layer installs the core Claude Code foundation:",
@@ -61,12 +56,10 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
       "",
       pc.dim("Backups of existing files will be created before any changes."),
     ].join("\n"),
-    "What the core install does"
+    "What the core install does",
   );
 
-  // --- 4. Core install ---
-  // Don't wrap in a spinner: core may shell out to package managers (apt/brew/etc)
-  // which need stdin/stdout for sudo prompts and progress output.
+  // Don't wrap in a spinner: core may shell out to apt/brew/etc which need stdin/stdout for sudo prompts.
   log.info("Installing core core (you may be prompted for sudo)...");
   const coreResults = await installCoreStep(env, dryRun, deployMode);
   log.success("Core core step complete");
@@ -80,9 +73,7 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
 
   const { categories: selectedCategories, skippedComponents } = await selectInteractive();
 
-  // --- 6. Install selected categories ---
-  // Don't wrap in clack.spinner — third-party installers (claude-mem, snyk, etc.)
-  // print their own progress / TUI which conflicts with the spinner's terminal control.
+  // No clack.spinner — third-party installers (claude-mem, snyk) print their own TUI that conflicts with terminal control.
   const categoryResults = await installCategories(env, selectedCategories, skippedComponents, dryRun, {
     onStart: (name) => log.info(`Installing ${name}...`),
     onDone: (name, failed) => failed > 0 ? log.warn(`${name} — ${failed} failed`) : log.success(`${name} — done`),
@@ -98,11 +89,8 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
   });
 
   const allResults = [...coreResults, ...categoryResults];
-
-  // --- 6.5. Re-apply hardened settings (some third-party installs reset deny rules) ---
   await reapplyHardenedSettings(env, dryRun);
 
-  // --- 7. Verification ---
   const vs = clack.spinner();
   vs.start("Running verification...");
   const report = await verifyAll(env, allResults);
@@ -116,9 +104,7 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
 
   if (!dryRun) await recordJournal(env, "all");
 
-  clack.outro(
-    pc.bold("Setup complete!") + pc.dim(" Restart your terminal to activate.")
-  );
+  clack.outro(pc.bold("Setup complete!") + pc.dim(" Restart your terminal to activate."));
 }
 
 async function runBatch(
@@ -208,18 +194,14 @@ export default defineCommand({
   async run({ args }) {
     const dryRun = Boolean(args["dry-run"]);
 
-    // Validate mutually exclusive options
     if (args["clean-install"] && args["add-on-top"]) {
       log.error("Cannot use both --clean-install and --add-on-top. Choose one.");
       process.exit(1);
     }
-
     if (args.global && args.local) {
       log.error("Cannot use both --global and --local. Choose one.");
       process.exit(1);
     }
-
-    // Validate tier if provided
     if (args.tier) {
       const validTiers = ["core", "recommended", "all"];
       if (!validTiers.includes(args.tier)) {
@@ -228,9 +210,8 @@ export default defineCommand({
       }
     }
 
-    // --- Resolve install mode + scope (Phase 2 orchestrator) ---
     const env = await detectEnvironment();
-    // No-TTY stdin (CI, pipes, tests) means prompts would hang. Treat as non-interactive.
+    // No-TTY stdin (CI, pipes, tests) would hang prompts — treat as non-interactive.
     const interactive = !args["non-interactive"] && process.stdin.isTTY === true;
 
     const resolved = await resolveInstallMode(
@@ -247,7 +228,6 @@ export default defineCommand({
       { interactive, dryRun },
     );
 
-    // --- Two-layer recoverable install wrapper (Phase 3) ---
     try {
       if (resolved.mode === "clean") {
         await performCleanInstall(resolved.resolvedEnv.claudeDir);
@@ -262,31 +242,7 @@ export default defineCommand({
 
       await runInteractive(dryRun, resolved.resolvedEnv, deployMode);
     } catch (err) {
-      log.error(`Install failed: ${err instanceof Error ? err.message : String(err)}`);
-      if (resolved.backupPath) {
-        log.info("Attempting automatic rollback from full-tree backup...");
-        try {
-          await restoreFromBackup(resolved.backupPath, resolved.resolvedEnv.claudeDir);
-          log.info("✓ Rollback complete. Original state restored.");
-          process.exit(1);
-        } catch (rollbackErr) {
-          log.error(`Rollback failed: ${rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr)}`);
-          log.error(`Manual recovery: run ${resolved.backupPath}/restore.sh`);
-          process.exit(2);
-        }
-      } else if (resolved.addOnTopLogPath) {
-        log.info("Attempting add-on-top rollback via write log...");
-        try {
-          await rollbackAddOnTop(resolved.addOnTopLogPath);
-          log.info("✓ Add-on-top rollback complete.");
-          process.exit(1);
-        } catch (rollbackErr) {
-          log.error(`Add-on-top rollback failed: ${rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr)}`);
-          log.error(`Write log location: ${resolved.addOnTopLogPath}`);
-          process.exit(2);
-        }
-      }
-      process.exit(1);
+      await handleInstallFailure(err, resolved);
     }
   },
 });
