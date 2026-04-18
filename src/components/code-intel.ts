@@ -26,7 +26,7 @@ export const codeIntelCategory: ComponentCategory = {
       mcpConfig: {
         name: "serena",
         type: "stdio",
-        command: "serena-agent",
+        command: "serena",
         args: ["start-mcp-server", "--project", "."],
       },
       verifyCommand: "serena-agent --version",

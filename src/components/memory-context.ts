@@ -82,22 +82,16 @@ export const memoryContextCategory: ComponentCategory = {
       id: 12,
       name: "claude-mem",
       displayName: "claude-mem",
-      description: "Persistent memory layer for Claude Code sessions",
+      description: "Persistent memory layer for Claude Code sessions — `claude-mem install --ide claude-code` self-registers its MCP server",
       tier: "recommended",
       category: "memory-context",
       packages: [
         {
           name: "claude-mem",
           displayName: "claude-mem",
-          npm: "npx claude-mem install",
+          npm: "npx claude-mem install --ide claude-code",
         },
       ],
-      mcpConfig: {
-        name: "claude-mem",
-        type: "stdio",
-        command: "claude-mem",
-        args: ["--bind", "127.0.0.1"],
-      },
       verifyCommand: "claude mcp list | grep -q '^claude-mem:'",
     },
     {
@@ -133,26 +127,27 @@ export async function install(env: DetectedEnvironment, dryRun: boolean): Promis
   const results: InstallResult[] = [];
 
   // --- claude-mem ---
+  // `claude-mem install --ide claude-code` self-registers its MCP server (v11+).
+  // We intentionally do NOT call registerMcp — the previous manual registration
+  // wrote stale args (`--bind 127.0.0.1`) that clobbered the installer's correct config.
   try {
-    const claudeMemMcp = { transport: "stdio" as const, command: "claude-mem", args: ["--bind", "127.0.0.1"] };
     if (dryRun) {
-      log.info("[dry-run] Would run: npx -y claude-mem install --ide claude-code");
+      log.info("[dry-run] Would run: npx -y claude-mem@latest install --ide claude-code");
       results.push({
         component: "claude-mem",
         status: "skipped",
-        message: "[dry-run] Would install and register claude-mem MCP server",
+        message: "[dry-run] Would install claude-mem (self-registers MCP)",
         verifyPassed: false,
       });
     } else {
       const existed = commandExists("claude-mem");
       log.info(existed ? "Upgrading claude-mem to latest" : "Installing claude-mem");
       await $`sh -c "npx -y claude-mem@latest install --ide claude-code"`;
-      await registerMcp("claude-mem", claudeMemMcp);
-      log.success(existed ? "claude-mem upgraded + MCP registered" : "claude-mem installed + MCP registered (bound to 127.0.0.1)");
+      log.success(existed ? "claude-mem upgraded (MCP self-registered)" : "claude-mem installed (MCP self-registered)");
       results.push({
         component: "claude-mem",
         status: "installed",
-        message: existed ? "claude-mem upgraded to latest and MCP config refreshed" : "claude-mem installed and MCP config registered",
+        message: existed ? "claude-mem upgraded to latest" : "claude-mem installed",
         verifyPassed: true,
       });
     }
