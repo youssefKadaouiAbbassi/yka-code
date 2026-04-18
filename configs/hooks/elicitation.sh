@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "elicitation"
 # Elicitation hook: log every MCP elicitation + flag non-allowlisted sources.
 # Input: {mcp_server_name, message, mode:"form"|"url", requested_schema?, session_id}
 # Passive observer — does not override the decision (action enum undocumented in v2.1.112).

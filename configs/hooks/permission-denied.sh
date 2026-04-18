@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "permission-denied"
 # PermissionDenied hook: audit every auto-mode classifier denial.
 # Input: {tool_name, tool_input, tool_use_id, reason, session_id}
 set -euo pipefail

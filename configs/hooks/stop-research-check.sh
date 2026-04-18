@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "stop-research-check"
 # Stop hook: audit the just-ended turn for unsourced library claims.
 # Scans the last assistant message in transcript_path for library/framework
 # name + version pattern; if found and no docfork/deepwiki/github MCP tool

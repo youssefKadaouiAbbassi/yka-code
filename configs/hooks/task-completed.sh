@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "task-completed"
 # TaskCompleted hook: append-only audit log of completed tasks.
 # Input: {task_id, task_subject, task_description?, teammate_name?, team_name?, session_id}
 # Non-blocking. Consumed by session-end.sh / stop-summary.sh for the per-session recap.

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "pre-destructive-blocker"
 set -euo pipefail
 
 # PreToolUse hook: blocks destructive patterns that settings.json deny can't

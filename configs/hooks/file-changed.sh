@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "file-changed"
 # FileChanged hook: flag out-of-band edits to trust-sensitive config files.
 # Input: {file_path, event:"change"|"add"|"unlink"}
 # Matcher in settings.json limits which files trigger this hook.

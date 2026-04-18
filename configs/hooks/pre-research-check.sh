@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "pre-research-check"
 # PreToolUse(WebSearch|WebFetch|mcp__docfork__*|mcp__deepwiki__*|mcp__github__*):
 # advisory warning if research-first skill was not invoked this turn. Non-blocking.
 set -uo pipefail

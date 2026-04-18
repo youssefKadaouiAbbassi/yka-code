@@ -56,9 +56,10 @@ const main = defineCommand({
     status: () => import("../src/commands/status.js").then((m) => m.default),
     restore: () => import("../src/commands/restore.js").then((m) => m.default),
     update: () => import("../src/commands/update.js").then((m) => m.default),
+    hooks: () => import("../src/commands/hooks.js").then((m) => m.default),
   },
   async run({ rawArgs }) {
-    const subcommandNames = ["setup", "status", "restore", "update"];
+    const subcommandNames = ["setup", "status", "restore", "update", "hooks"];
     const firstNonFlag = rawArgs.find((a) => !a.startsWith("-"));
     if (firstNonFlag && subcommandNames.includes(firstNonFlag)) {
       // Subcommand was matched and already executed by citty — do nothing.

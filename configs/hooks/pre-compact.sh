@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "pre-compact"
 # PreCompact hook: block auto-compact when transcript contains active secrets.
 # Input: {trigger:"manual"|"auto", custom_instructions:"", transcript_path:"..."}
 # Exit 2 blocks the compaction; stderr is fed back to Claude.

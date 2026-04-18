@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "post-lint-gate"
 set -euo pipefail
 
 # PostToolUse hook: auto-detects stack and runs appropriate linter after file edits.

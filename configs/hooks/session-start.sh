@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "session-start"
 # SessionStart hook: yka-code banner + autoskills auto-seed.
 # CC renders hook output as a visible panel only when emitted as JSON with
 # `systemMessage`. We build the banner in a buffer, JSON-escape it via python,

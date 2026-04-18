@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "user-prompt-submit"
 # UserPromptSubmit hook: inject today's ISO date and current git branch into
 # every turn via the `additionalContext` field of the advanced JSON response.
 # Kills the training-cutoff class of bugs — Claude always has the correct date

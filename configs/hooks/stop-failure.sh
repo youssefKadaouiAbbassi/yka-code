@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "stop-failure"
 # StopFailure hook: log abnormal stops; alert loudly on credential/billing failures.
 # Input: {error, error_details, last_assistant_message, session_id}
 set -euo pipefail

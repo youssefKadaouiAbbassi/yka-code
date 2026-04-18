@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "post-compact"
 # PostCompact hook: hash + archive each compaction summary for audit provenance.
 # Input: {trigger, compact_summary:"...", session_id, transcript_path}
 set -euo pipefail

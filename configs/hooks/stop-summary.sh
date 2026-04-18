@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "stop-summary"
 # Stop hook: scans recently modified files for debug patterns.
 # Advisory only — reports findings but never blocks completion.
 # NOTE: no `set -e`, no `pipefail` — grep|head SIGPIPE would otherwise

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "pre-secrets-guard"
 set -euo pipefail
 
 # PreToolUse hook: blocks tool inputs containing secrets or credentials.

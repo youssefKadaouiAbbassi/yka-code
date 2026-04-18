@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "task-created"
 # TaskCreated hook: log every team task; exit 2 to reject malformed tasks.
 # Input: {task_id, task_subject, task_description?, teammate_name?, team_name?, session_id}
 set -euo pipefail

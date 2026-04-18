@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "pre-pr-gate"
 # PreToolUse(Bash): gate commands that create PRs or push to a remote branch.
 # Blocks pushes to the default branch; warns on missing recent tests; advises
 # on oversize diffs. Runs only on specific commands — cheap for everything else.

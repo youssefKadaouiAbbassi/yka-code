@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "session-end"
 set -euo pipefail
 
 if ! command -v jq >/dev/null 2>&1; then

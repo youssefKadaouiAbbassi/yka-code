@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/_hook-guard.sh" "teammate-idle"
 # TeammateIdle hook: log teammate idle state; optionally require artifacts.
 # Input: {teammate_name, team_name, session_id}
 # Exit 2 feeds stderr back to teammate and keeps it working instead of idling.
