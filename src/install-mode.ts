@@ -11,8 +11,6 @@ import { log } from "./utils.js";
 import { resolveClaudeDir, rewriteEnvForScope } from "./scope.js";
 import type { DetectedEnvironment } from "./types.js";
 
-export { resolveClaudeDir, rewriteEnvForScope };
-
 export type InstallMode = "clean" | "add-on-top" | "fresh";
 export type ConflictPolicy = "skip" | "overwrite";
 

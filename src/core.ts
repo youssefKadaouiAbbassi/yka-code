@@ -18,8 +18,6 @@ import { resolveWrite, resolveMerge, type DeployMode } from "./add-on-top.js";
 import { buildHooksConfig } from "./hook-registry.js";
 import { isLocalScope, templateDir } from "./scope.js";
 
-export { isLocalScope, templateDir };
-
 async function deploySettings(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "claude-settings";
   const targetPath = join(env.claudeDir, "settings.json");
