@@ -1,6 +1,5 @@
-import { $ } from "bun";
 import type { ComponentCategory, DetectedEnvironment, InstallResult } from "../types.js";
-import { commandExists, registerMcp, log } from "../utils.js";
+import { registerMcp, log } from "../utils.js";
 import { installBinary } from "../packages.js";
 
 export const githubCategory: ComponentCategory = {

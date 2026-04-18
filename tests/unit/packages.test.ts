@@ -6,15 +6,6 @@ import {
   SOPS_CURL,
   GITLEAKS_CURL,
 } from "../../src/packages.js";
-import type { DetectedEnvironment } from "../../src/types.js";
-
-function env(over: Partial<DetectedEnvironment> = {}): DetectedEnvironment {
-  return {
-    os: "linux", arch: "x64", shell: "bash", shellRcPath: "/tmp/.bashrc",
-    packageManager: "apt", homeDir: "/tmp/home", claudeDir: "/tmp/home/.claude",
-    existingTools: new Map(), dockerAvailable: false, ...over,
-  };
-}
 
 describe("CORE_PLUGINS", () => {
   test("has 10 Anthropic-maintained plugin names", () => {
