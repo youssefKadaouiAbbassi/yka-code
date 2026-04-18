@@ -16,7 +16,7 @@ import { createBackup, restoreFromPartialManifest } from "./backup.js";
 import { resolveWrite, resolveMerge, type DeployMode } from "./add-on-top.js";
 import { buildHooksConfig } from "./hook-registry.js";
 import { isLocalScope, templateDir } from "./scope.js";
-import { deployManagedDirectory } from "./deploy.js";
+import { deployManagedDirectory, type DeployKind } from "./deploy.js";
 
 async function deploySettings(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "claude-settings";
@@ -103,46 +103,35 @@ async function writeManifest(path: string, entries: string[]): Promise<void> {
   await Bun.write(path, JSON.stringify({ version: MANIFEST_VERSION, entries: entries.sort() }, null, 2) + "\n");
 }
 
-function deploySkills(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
-  const dst = join(env.claudeDir, "skills");
-  return deployManagedDirectory({
-    component: "orchestration-skills",
-    src: join(getConfigsDir(), "..", "skills"),
-    dst,
-    manifestPath: join(dst, MANIFEST_NAME),
-    kind: "skills",
-    entryKind: "directory",
-    glob: "*/SKILL.md",
-    deployMode,
-    dryRun,
-  });
-}
+type ManagedTreeSpec = {
+  component: string;
+  kind: DeployKind;
+  dir: string;
+  entryKind: "directory" | "file";
+  glob: string;
+};
 
-function deployCommands(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
-  const dst = join(env.claudeDir, "commands");
-  return deployManagedDirectory({
-    component: "user-commands",
-    src: join(getConfigsDir(), "..", "commands"),
-    dst,
-    manifestPath: join(dst, MANIFEST_NAME),
-    kind: "commands",
-    entryKind: "file",
-    glob: "*.md",
-    deployMode,
-    dryRun,
-  });
-}
+const MANAGED_TREES: ManagedTreeSpec[] = [
+  { component: "orchestration-skills", kind: "skills", dir: "skills", entryKind: "directory", glob: "*/SKILL.md" },
+  { component: "user-commands", kind: "commands", dir: "commands", entryKind: "file", glob: "*.md" },
+  { component: "user-agents", kind: "agents", dir: "agents", entryKind: "file", glob: "*.md" },
+];
 
-function deployAgents(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
-  const dst = join(env.claudeDir, "agents");
+function deployManagedTree(
+  spec: ManagedTreeSpec,
+  env: DetectedEnvironment,
+  dryRun: boolean,
+  deployMode?: DeployMode,
+): Promise<InstallResult> {
+  const dst = join(env.claudeDir, spec.dir);
   return deployManagedDirectory({
-    component: "user-agents",
-    src: join(getConfigsDir(), "..", "agents"),
+    component: spec.component,
+    src: join(getConfigsDir(), "..", spec.dir),
     dst,
     manifestPath: join(dst, MANIFEST_NAME),
-    kind: "agents",
-    entryKind: "file",
-    glob: "*.md",
+    kind: spec.kind,
+    entryKind: spec.entryKind,
+    glob: spec.glob,
     deployMode,
     dryRun,
   });
@@ -505,9 +494,9 @@ export async function installCore(
     results.push(await deployClaudeMd(env, dryRun, deployMode));
     results.push(await deployHooks(env, dryRun, deployMode));
     if (!local) {
-      results.push(await deploySkills(env, dryRun, deployMode));
-      results.push(await deployCommands(env, dryRun, deployMode));
-      results.push(await deployAgents(env, dryRun, deployMode));
+      for (const spec of MANAGED_TREES) {
+        results.push(await deployManagedTree(spec, env, dryRun, deployMode));
+      }
       results.push(await installJq(env, dryRun));
       results.push(await installTmux(env, dryRun));
       results.push(await installStarship(env, dryRun));
