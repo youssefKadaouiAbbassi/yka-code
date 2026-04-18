@@ -26,12 +26,6 @@ for hook in "${required_hooks[@]}"; do
   [[ -x "${hooks_dir}/${hook}" ]] || printf 'drift: hook %s missing or not executable\n' "$hook"
 done
 
-settings="${claude_dir}/settings.json"
-if [[ -f "$settings" ]] && command -v jq >/dev/null 2>&1; then
-  scrub=$(jq -r '.env.CLAUDE_CODE_SUBPROCESS_ENV_SCRUB // "unset"' "$settings" 2>/dev/null)
-  [[ "$scrub" == "0" ]] && printf 'drift: CLAUDE_CODE_SUBPROCESS_ENV_SCRUB explicitly set to "0" — leaks secrets to Bash subprocesses\n'
-fi
-
 if command -v claude >/dev/null 2>&1; then
   if ! claude mcp list 2>/dev/null | grep -q '^serena:'; then
     printf 'drift: MCP "serena" not registered (run yka-code setup)\n'

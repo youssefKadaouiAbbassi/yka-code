@@ -637,18 +637,17 @@ async function enableTelemetry(env: DetectedEnvironment, dryRun: boolean): Promi
   const lines = [
     "export CLAUDE_CODE_ENABLE_TELEMETRY=1",
     "export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1",
-    "export CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1",
   ];
 
   if (dryRun) {
     log.info(`[dry-run] Would append Claude Code env vars to ${env.shellRcPath}`);
-    return { component, status: "skipped", message: `[dry-run] Would set Claude Code env vars (telemetry, agent teams, subprocess env scrub)`, verifyPassed: false };
+    return { component, status: "skipped", message: `[dry-run] Would set Claude Code env vars (telemetry, agent teams)`, verifyPassed: false };
   }
 
   try {
     await appendToShellRc(env, lines, "claude-code-env");
     log.success(`Claude Code env vars added to ${env.shellRcPath}`);
-    return { component, status: "installed", message: `Telemetry + agent-teams + subprocess-env-scrub env vars added`, verifyPassed: true };
+    return { component, status: "installed", message: `Telemetry + agent-teams env vars added`, verifyPassed: true };
   } catch (error) {
     return {
       component,
