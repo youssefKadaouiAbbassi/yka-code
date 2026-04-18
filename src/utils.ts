@@ -60,12 +60,7 @@ export function getConfigsDir(): string {
   return join(import.meta.dir, "..", "configs");
 }
 
-const HOOK_EVENT_KEYS = new Set([
-  "PreToolUse", "PostToolUse", "SessionStart", "SessionEnd",
-  "Stop", "StopFailure", "PreCompact", "PostCompact",
-  "PermissionDenied", "CwdChanged", "Elicitation", "FileChanged",
-  "TaskCreated", "TaskCompleted", "TeammateIdle", "Notification",
-]);
+import { HOOK_EVENT_KEYS } from "./hook-registry.js";
 
 export const mergeSettings = deepmergeCustom({
   mergeArrays: (values, _utils, meta) => {
