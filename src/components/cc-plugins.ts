@@ -7,18 +7,18 @@ import { commandExists, log } from "../utils.js";
 const MARKETPLACE_SLUG = "anthropics/claude-plugins-official";
 const MARKETPLACE_NAME = "claude-plugins-official";
 
-const EXTRA_MARKETPLACES: Array<{ slug: string; marketplaceName: string; plugins: string[] }> = [];
+const EXTRA_MARKETPLACES: Array<{ slug: string; marketplaceName: string; plugins: string[] }> = [
+  { slug: "obra/superpowers-marketplace", marketplaceName: "superpowers-marketplace", plugins: [] },
+];
 
 export const CORE_PLUGINS = [
   "feature-dev",
   "code-review",
   "pr-review-toolkit",
-  "code-simplifier",
   "commit-commands",
   "claude-code-setup",
   "claude-md-management",
   "frontend-design",
-  "playground",
   "skill-creator",
   "session-report",
   "plugin-dev",
