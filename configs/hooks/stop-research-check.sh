@@ -39,7 +39,19 @@ fi
 # Scan assistant text for library-mention-plus-version patterns.
 # Pattern: library keyword + version number (e.g. "React 19", "axum 0.7", "bun 1.2.0")
 # or library keyword + version-flagged verb (deprecated/removed/introduced/new in/as of).
-libs='(react|vue|svelte|solid|angular|next\.?js|nuxt|remix|astro|bun|deno|node\.?js|express|fastify|nestjs|prisma|drizzle|mongoose|typeorm|zod|valibot|trpc|tanstack|tailwindcss|sass|django|flask|fastapi|pydantic|pandas|polars|numpy|pytorch|tensorflow|transformers|langchain|langgraph|sqlalchemy|alembic|pytest|poetry|uv|tokio|axum|actix|rocket|serde|clap|diesel|sqlx|reqwest|hyper|gin|echo|chi|gorm|cobra|viper|spring|ktor|gradle|maven|junit|react\s?native|flutter|expo|electron|tauri|stripe|clerk|supabase|firebase|vercel|cloudflare)'
+#
+# Library list is user-extensible via ~/.claude/research-libs.txt (one lib per line,
+# bash-regex fragments allowed like `next\.?js`). Falls back to the embedded default.
+default_libs='(react|vue|svelte|solid|angular|next\.?js|nuxt|remix|astro|bun|deno|node\.?js|express|fastify|nestjs|prisma|drizzle|mongoose|typeorm|zod|valibot|trpc|tanstack|tailwindcss|sass|django|flask|fastapi|pydantic|pandas|polars|numpy|pytorch|tensorflow|transformers|langchain|langgraph|sqlalchemy|alembic|pytest|poetry|uv|tokio|axum|actix|rocket|serde|clap|diesel|sqlx|reqwest|hyper|gin|echo|chi|gorm|cobra|viper|spring|ktor|gradle|maven|junit|react\s?native|flutter|expo|electron|tauri|stripe|clerk|supabase|firebase|vercel|cloudflare)'
+
+user_libs_file="${HOME}/.claude/research-libs.txt"
+if [[ -f "$user_libs_file" ]]; then
+  # Join non-empty, non-comment lines with |
+  joined="$(grep -vE '^\s*(#|$)' "$user_libs_file" 2>/dev/null | tr '\n' '|' | sed 's/|$//')"
+  [[ -n "$joined" ]] && libs="(${joined})" || libs="$default_libs"
+else
+  libs="$default_libs"
+fi
 version_ver='(v?[0-9]+(\.[0-9]+){0,3})'
 version_verbs='(deprecated|removed|introduced|renamed|landed|shipped|added|since|as of|requires)'
 

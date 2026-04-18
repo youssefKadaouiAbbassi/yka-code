@@ -20,8 +20,16 @@ autoskills_seed_if_missing() {
   [[ -z "$git_root" ]] && return 0
   [[ -d "$git_root/.claude/skills" ]] && return 0
   command -v npx >/dev/null 2>&1 || return 0
-  # Fire & forget; don't block the session on npx resolution.
-  (cd "$git_root" && nohup npx --yes autoskills -y >/tmp/autoskills-$$.log 2>&1 &) >/dev/null 2>&1
+  # Fire & forget behind a per-project flock so parallel Claude sessions don't race.
+  # -n (nonblock): if another session holds the lock, skip silently instead of queueing.
+  local lock_key
+  lock_key="$(printf '%s' "$git_root" | md5sum 2>/dev/null | cut -d' ' -f1 || printf '%s' "$git_root" | shasum | cut -d' ' -f1)"
+  local lock_file="/tmp/autoskills-$(id -u)-${lock_key}.lock"
+  if command -v flock >/dev/null 2>&1; then
+    (cd "$git_root" && nohup flock -n "$lock_file" -c 'npx --yes autoskills -y' >/tmp/autoskills-$$.log 2>&1 &) >/dev/null 2>&1
+  else
+    (cd "$git_root" && nohup npx --yes autoskills -y >/tmp/autoskills-$$.log 2>&1 &) >/dev/null 2>&1
+  fi
 }
 
 sessions_today() {

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# TaskCompleted hook: log completion, audit final state.
+# TaskCompleted hook: append-only audit log of completed tasks.
 # Input: {task_id, task_subject, task_description?, teammate_name?, team_name?, session_id}
-# Exit 2 to block completion — e.g., tests must pass before a task can be marked done.
+# Non-blocking. Consumed by session-end.sh / stop-summary.sh for the per-session recap.
 set -euo pipefail
 trap 'exit 0' ERR
 

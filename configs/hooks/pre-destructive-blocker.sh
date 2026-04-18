@@ -50,11 +50,27 @@ check 'dd[[:space:]]+if=' "Blocked: dd disk operation"
 check '>[[:space:]]*/dev/sd' "Blocked: direct write to block device (sd)"
 check '>[[:space:]]*/dev/hd' "Blocked: direct write to block device (hd)"
 check '>[[:space:]]*/dev/nvme' "Blocked: direct write to NVMe device"
+check 'rm[[:space:]]+-[rR]f?[[:space:]]+~($|[[:space:]/])' "Blocked: rm -rf on home directory"
+check 'rm[[:space:]]+-[rR]f?[[:space:]]+\$HOME' "Blocked: rm -rf on \$HOME"
 
 # Git destructive patterns settings can't glob cleanly.
 check 'git[[:space:]]+clean[[:space:]]+-[a-zA-Z]*f' "Blocked: git clean with -f (matches -fd, -fxd, -df, etc.)"
 check 'git[[:space:]]+checkout[[:space:]]+--[[:space:]]+\.' "Blocked: git checkout -- . (discard all changes)"
 check 'git[[:space:]]+restore[[:space:]]+\.' "Blocked: git restore . (discard all changes)"
+check 'git[[:space:]]+push[[:space:]]+.*--mirror' "Blocked: git push --mirror (overwrites remote refs)"
+check 'git[[:space:]]+push[[:space:]]+.*--delete' "Blocked: git push --delete (remote branch/tag deletion)"
+
+# Container / infra destruction.
+check 'docker[[:space:]]+system[[:space:]]+prune[[:space:]]+.*-a.*-f' "Blocked: docker system prune -af (removes all unused images, networks, volumes)"
+check 'docker[[:space:]]+system[[:space:]]+prune[[:space:]]+.*-f.*-a' "Blocked: docker system prune -fa (removes all unused images, networks, volumes)"
+check 'docker[[:space:]]+volume[[:space:]]+prune[[:space:]]+.*-f' "Blocked: docker volume prune -f (removes named volumes)"
+check 'kubectl[[:space:]]+delete[[:space:]]+(ns|namespace)[[:space:]]' "Blocked: kubectl delete namespace (tears down everything in it)"
+check 'kubectl[[:space:]]+delete[[:space:]]+.*--all-namespaces' "Blocked: kubectl delete with --all-namespaces"
+
+# Package-manager destruction.
+check 'bun[[:space:]]+install[[:space:]]+.*--force' "Blocked: bun install --force (re-fetches and may clobber local state)"
+check 'npm[[:space:]]+install[[:space:]]+.*--force' "Blocked: npm install --force (resolves version conflicts by overwriting)"
+check 'rm[[:space:]]+-[rR]f?[[:space:]]+node_modules[[:space:]]+.*&&[[:space:]]*(npm|pnpm|yarn|bun)[[:space:]]+install' "Blocked: nuke-node_modules-and-reinstall pattern (lock file churn)"
 
 # Database destruction (case-insensitive, regex).
 check_i 'DROP[[:space:]]+DATABASE' "Blocked: DROP DATABASE statement"
