@@ -132,7 +132,11 @@ export default defineCommand({
     disable: disableCmd,
     enable: enableCmd,
   },
-  async run() {
+  async run({ rawArgs }) {
+    const subs = new Set(["list", "disable", "enable"]);
+    const firstNonFlag = rawArgs.find((a) => !a.startsWith("-"));
+    if (firstNonFlag && subs.has(firstNonFlag)) return;
+
     console.log("Usage: yka-code-setup hooks <list|disable|enable> [name]");
     console.log("");
     console.log("Examples:");

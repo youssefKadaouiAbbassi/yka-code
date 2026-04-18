@@ -15,7 +15,12 @@ If `$ARGUMENTS` is empty, tell the user to provide a hook name (e.g. `pre-pr-gat
 Otherwise run:
 
 ```bash
-yka-code-setup hooks enable $ARGUMENTS 2>/dev/null || bunx --bun @youssefKadaouiAbbassi/yka-code-setup hooks enable $ARGUMENTS
+if command -v yka-code-setup >/dev/null 2>&1; then
+  yka-code-setup hooks enable $ARGUMENTS
+else
+  echo "yka-code-setup not on PATH. Install it globally: cd <yka-code repo> && bun link"
+  exit 1
+fi
 ```
 
 Show the output verbatim. No further action.

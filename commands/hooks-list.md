@@ -8,7 +8,12 @@ allowed-tools: Bash
 Run:
 
 ```bash
-yka-code-setup hooks list 2>/dev/null || bunx --bun @youssefKadaouiAbbassi/yka-code-setup hooks list
+if command -v yka-code-setup >/dev/null 2>&1; then
+  yka-code-setup hooks list
+else
+  echo "yka-code-setup not on PATH. Install it globally: cd <yka-code repo> && bun link"
+  exit 1
+fi
 ```
 
 Show the output verbatim. No further action.
