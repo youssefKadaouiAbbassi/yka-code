@@ -4,7 +4,6 @@ import { symlink } from "node:fs/promises";
 import type { DetectedEnvironment, InstallResult } from "./types.js";
 import {
   copyFile,
-  copyDir,
   ensureDir,
   mergeJsonFile,
   appendToShellRc,
@@ -17,6 +16,7 @@ import { createBackup, restoreFromPartialManifest } from "./backup.js";
 import { resolveWrite, resolveMerge, type DeployMode } from "./add-on-top.js";
 import { buildHooksConfig } from "./hook-registry.js";
 import { isLocalScope, templateDir } from "./scope.js";
+import { deployManagedDirectory } from "./deploy.js";
 
 async function deploySettings(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const component = "claude-settings";
@@ -103,158 +103,49 @@ async function writeManifest(path: string, entries: string[]): Promise<void> {
   await Bun.write(path, JSON.stringify({ version: MANIFEST_VERSION, entries: entries.sort() }, null, 2) + "\n");
 }
 
-async function deploySkills(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
-  const component = "orchestration-skills";
-  const src = join(getConfigsDir(), "..", "skills");
+function deploySkills(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const dst = join(env.claudeDir, "skills");
-  const manifestPath = join(dst, MANIFEST_NAME);
-
-  const skillDirs = await Array.fromAsync(new Bun.Glob("*/SKILL.md").scan({ cwd: src, onlyFiles: true }));
-  const current = [...new Set(skillDirs.map((rel) => rel.split("/")[0]))];
-  const previous = await readManifest(manifestPath);
-  const stale = previous.filter((name) => !current.includes(name));
-
-  if (dryRun) {
-    log.info(`[dry-run] Would deploy ${current.length} skills from ${src} to ${dst}`);
-    if (stale.length > 0) log.info(`[dry-run] Would remove ${stale.length} stale skill(s): ${stale.join(", ")}`);
-    return { component, status: "skipped", message: `[dry-run] Would deploy ${current.length} skills, remove ${stale.length} stale`, verifyPassed: false };
-  }
-
-  try {
-    await ensureDir(dst);
-
-    for (const name of stale) {
-      await $`rm -rf ${join(dst, name)}`.quiet();
-    }
-
-    const previousSet = new Set(previous);
-    let skipped = 0;
-    for (const name of current) {
-      const skillDst = join(dst, name);
-      if (!previousSet.has(name) && await resolveWrite(skillDst, deployMode) === "skip") {
-        skipped++;
-        continue;
-      }
-      await $`rm -rf ${skillDst}`.quiet();
-      await copyDir(join(src, name), skillDst);
-    }
-
-    await writeManifest(manifestPath, current.filter((n) => previousSet.has(n) || skipped === 0));
-
-    const removedMsg = stale.length > 0 ? `, removed ${stale.length} stale (${stale.join(", ")})` : "";
-    const skipMsg = skipped > 0 ? `, skipped ${skipped} (user-owned collision)` : "";
-    log.success(`Deployed ${current.length - skipped} skill(s) to ${dst}${removedMsg}${skipMsg}`);
-    return { component, status: "installed", message: `${current.length - skipped} skills deployed${removedMsg}${skipMsg}`, verifyPassed: true };
-  } catch (err) {
-    return {
-      component,
-      status: "failed",
-      message: `Failed to deploy skills: ${err instanceof Error ? err.message : String(err)}`,
-      verifyPassed: false,
-    };
-  }
+  return deployManagedDirectory({
+    component: "orchestration-skills",
+    src: join(getConfigsDir(), "..", "skills"),
+    dst,
+    manifestPath: join(dst, MANIFEST_NAME),
+    kind: "skills",
+    entryKind: "directory",
+    glob: "*/SKILL.md",
+    deployMode,
+    dryRun,
+  });
 }
 
-async function deployCommands(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
-  const component = "user-commands";
-  const src = join(getConfigsDir(), "..", "commands");
+function deployCommands(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const dst = join(env.claudeDir, "commands");
-  const manifestPath = join(dst, MANIFEST_NAME);
-
-  const files = await Array.fromAsync(new Bun.Glob("*.md").scan({ cwd: src, onlyFiles: true }));
-  const current = [...files];
-  const previous = await readManifest(manifestPath);
-  const stale = previous.filter((name) => !current.includes(name));
-
-  if (dryRun) {
-    log.info(`[dry-run] Would deploy ${current.length} command(s) from ${src} to ${dst}`);
-    if (stale.length > 0) log.info(`[dry-run] Would remove ${stale.length} stale command(s): ${stale.join(", ")}`);
-    return { component, status: "skipped", message: `[dry-run] Would deploy ${current.length} commands, remove ${stale.length} stale`, verifyPassed: false };
-  }
-
-  try {
-    await ensureDir(dst);
-
-    for (const name of stale) {
-      await $`rm -f ${join(dst, name)}`.quiet();
-    }
-
-    const previousSet = new Set(previous);
-    let skipped = 0;
-    for (const name of current) {
-      const target = join(dst, name);
-      if (!previousSet.has(name) && await resolveWrite(target, deployMode) === "skip") {
-        skipped++;
-        continue;
-      }
-      await copyFile(join(src, name), target);
-    }
-
-    await writeManifest(manifestPath, current);
-
-    const removedMsg = stale.length > 0 ? `, removed ${stale.length} stale (${stale.join(", ")})` : "";
-    const skipMsg = skipped > 0 ? `, skipped ${skipped} (user-owned collision)` : "";
-    log.success(`Deployed ${current.length - skipped} slash command(s) to ${dst}${removedMsg}${skipMsg}`);
-    return { component, status: "installed", message: `${current.length - skipped} user commands deployed${removedMsg}${skipMsg}`, verifyPassed: true };
-  } catch (err) {
-    return {
-      component,
-      status: "failed",
-      message: `Failed to deploy commands: ${err instanceof Error ? err.message : String(err)}`,
-      verifyPassed: false,
-    };
-  }
+  return deployManagedDirectory({
+    component: "user-commands",
+    src: join(getConfigsDir(), "..", "commands"),
+    dst,
+    manifestPath: join(dst, MANIFEST_NAME),
+    kind: "commands",
+    entryKind: "file",
+    glob: "*.md",
+    deployMode,
+    dryRun,
+  });
 }
 
-async function deployAgents(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
-  const component = "user-agents";
-  const src = join(getConfigsDir(), "..", "agents");
+function deployAgents(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
   const dst = join(env.claudeDir, "agents");
-  const manifestPath = join(dst, MANIFEST_NAME);
-
-  const files = await Array.fromAsync(new Bun.Glob("*.md").scan({ cwd: src, onlyFiles: true }));
-  const current = files.filter((f) => f.toUpperCase() !== "AGENTS.md");
-  const previous = await readManifest(manifestPath);
-  const stale = previous.filter((name) => !current.includes(name));
-
-  if (dryRun) {
-    log.info(`[dry-run] Would deploy ${current.length} agent(s) from ${src} to ${dst}`);
-    if (stale.length > 0) log.info(`[dry-run] Would remove ${stale.length} stale agent(s): ${stale.join(", ")}`);
-    return { component, status: "skipped", message: `[dry-run] Would deploy ${current.length} agents, remove ${stale.length} stale`, verifyPassed: false };
-  }
-
-  try {
-    await ensureDir(dst);
-
-    for (const name of stale) {
-      await $`rm -f ${join(dst, name)}`.quiet();
-    }
-
-    const previousSet = new Set(previous);
-    let skipped = 0;
-    for (const name of current) {
-      const target = join(dst, name);
-      if (!previousSet.has(name) && await resolveWrite(target, deployMode) === "skip") {
-        skipped++;
-        continue;
-      }
-      await copyFile(join(src, name), target);
-    }
-
-    await writeManifest(manifestPath, current);
-
-    const removedMsg = stale.length > 0 ? `, removed ${stale.length} stale (${stale.join(", ")})` : "";
-    const skipMsg = skipped > 0 ? `, skipped ${skipped} (user-owned collision)` : "";
-    log.success(`Deployed ${current.length - skipped} subagent(s) to ${dst}${removedMsg}${skipMsg}`);
-    return { component, status: "installed", message: `${current.length - skipped} user agents deployed${removedMsg}${skipMsg}`, verifyPassed: true };
-  } catch (err) {
-    return {
-      component,
-      status: "failed",
-      message: `Failed to deploy agents: ${err instanceof Error ? err.message : String(err)}`,
-      verifyPassed: false,
-    };
-  }
+  return deployManagedDirectory({
+    component: "user-agents",
+    src: join(getConfigsDir(), "..", "agents"),
+    dst,
+    manifestPath: join(dst, MANIFEST_NAME),
+    kind: "agents",
+    entryKind: "file",
+    glob: "*.md",
+    deployMode,
+    dryRun,
+  });
 }
 
 async function deployHooks(env: DetectedEnvironment, dryRun: boolean, deployMode?: DeployMode): Promise<InstallResult> {
