@@ -62,7 +62,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/post-edit-lint.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/configs/project-claude/hooks/post-edit-lint.sh"
           }
         ]
       },
@@ -71,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/configs/hooks/post-bash-test.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/configs/project-claude/hooks/post-bash-test.sh"
           }
         ]
       }
