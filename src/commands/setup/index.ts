@@ -60,9 +60,9 @@ async function runInteractive(dryRun: boolean, envOverride?: DetectedEnvironment
   );
 
   // Don't wrap in a spinner: core may shell out to apt/brew/etc which need stdin/stdout for sudo prompts.
-  log.info("Installing core core (you may be prompted for sudo)...");
+  log.info("Installing core (you may be prompted for sudo)...");
   const coreResults = await installCoreStep(env, dryRun, deployMode);
-  log.success("Core core step complete");
+  log.success("Core step complete");
 
   if (isLocalScope(env)) {
     const report = await verifyAll(env, coreResults);
