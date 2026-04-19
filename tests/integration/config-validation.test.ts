@@ -98,6 +98,35 @@ describe("Config validation", () => {
     expect(text.trim().length).toBeGreaterThan(0);
   });
 
+  test("starship.toml escapes literal $ in git_status.stashed", async () => {
+    const text = await Bun.file(join(CONFIGS_DIR, "starship.toml")).text();
+    const stashedLine = text
+      .split("\n")
+      .find((line) => /^\s*stashed\s*=/.test(line));
+    expect(stashedLine).toBeDefined();
+    expect(stashedLine).toMatch(/stashed\s*=\s*'\\\$'/);
+  });
+
+  const starshipAvailable = Bun.which("starship") !== null;
+
+  test.skipIf(!starshipAvailable)(
+    "starship parses starship.toml with no format-string warnings",
+    async () => {
+      const configPath = join(CONFIGS_DIR, "starship.toml");
+      const repoRoot = join(CONFIGS_DIR, "..");
+      const proc = Bun.spawn(["starship", "prompt"], {
+        cwd: repoRoot,
+        env: { ...process.env, STARSHIP_CONFIG: configPath },
+        stdout: "pipe",
+        stderr: "pipe",
+      });
+      await proc.exited;
+      const stderr = await new Response(proc.stderr).text();
+      expect(stderr).not.toMatch(/\[WARN\]/);
+      expect(stderr).not.toMatch(/Error parsing format string/);
+    },
+  );
+
   test("config tree contains both home-claude and project-claude template dirs", async () => {
     const homeSettings = Bun.file(join(CONFIGS_DIR, "home-claude/settings.json"));
     const projectSettings = Bun.file(join(CONFIGS_DIR, "project-claude/settings.json"));
