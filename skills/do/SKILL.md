@@ -195,7 +195,6 @@ Your installed plugins expose these commands:
 - **pr-review-toolkit plugin:** code-reviewer, code-simplifier, comment-analyzer, pr-test-analyzer, silent-failure-hunter, type-design-analyzer
 - **code-simplifier plugin:** code-simplifier
 - **Built-in:** Explore (fast code mapping), Plan (architecture planning), general-purpose (catch-all), claude-code-guide (meta questions)
-- **Custom:** do-classifier, do-clarifier, do-recorder (our /do orchestrator)
 
 ### MCP servers (auto-invoked by Claude when relevant)
 - **serena** — semantic code analysis, symbol resolution, cross-module refs (LSP-backed)
