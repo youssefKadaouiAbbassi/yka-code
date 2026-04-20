@@ -38,6 +38,7 @@ export const HOOK_REGISTRATIONS: HookRegistration[] = [
   { file: "session-start.sh",          event: "SessionStart" },
   { file: "session-start-team-reaper.sh", event: "SessionStart" },
   { file: "session-start-update-check.sh", event: "SessionStart" },
+  { file: "session-start-yka-update-check.sh", event: "SessionStart" },
   { file: "session-end.sh",            event: "SessionEnd" },
 
   { file: "stop-summary.sh",           event: "Stop" },
