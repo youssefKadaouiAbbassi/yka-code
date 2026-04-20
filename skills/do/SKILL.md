@@ -73,7 +73,7 @@ Read the user's request and decide which bucket fits best:
 | Signal in user's message | Route to |
 |---|---|
 | "rough idea", "I'm thinking about", "maybe we should", "not sure yet", "figure out", "something like", or any fuzzy-scope request | **brainstorming** (produces a short spec at `tasks/specs/<date>-<topic>.md`, then re-enters Phase 1 with the spec) |
-| "help me clarify the spec", "pin down the requirements", "what am I missing", OR a spec at `tasks/specs/*.md` has ≥3 `[NEEDS CLARIFICATION]` markers | **clarify-spec** (bounded 5-question Impact×Uncertainty loop, writes into the spec file in place) |
+| "help me clarify the spec", "pin down the requirements", "what am I missing", OR a spec at `tasks/specs/*.md` has ≥3 `[NEEDS CLARIFICATION]` markers | **speckit-clarify** (from `dceoy/speckit-agent-skills@speckit-clarify`, installed via skills.sh — faithful port of spec-kit's `/speckit.clarify` max-5-Q bounded loop) |
 | "build", "implement", "add", "ship", "create a new …" | **ship-feature** |
 | "broken", "error", "crash", "failing test", "bug", "doesn't work" | **fix-bug** |
 | "refactor", "clean up", "simplify", "extract", "dedupe", "reorganize" | **refactor-safely** |

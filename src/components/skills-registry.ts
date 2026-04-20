@@ -24,6 +24,21 @@ const SKILLS_SH_PACKAGES: Array<{ source: string; skill?: string; why: string }>
     skill: "playwright-cli",
     why: "Pure CLI browser automation — 40+ commands, no MCP. Snapshots after each command; stays cheap token-wise",
   },
+  {
+    source: "obra/superpowers",
+    skill: "brainstorming",
+    why: "Socratic one-question-at-a-time spec refinement (113K installs) — upstream canonical from the Superpowers maintainer",
+  },
+  {
+    source: "obra/superpowers",
+    skill: "verification-before-completion",
+    why: "Iron Law self-challenge before claiming done — upstream canonical Superpowers skill. Refetched every setup run",
+  },
+  {
+    source: "dceoy/speckit-agent-skills",
+    skill: "speckit-clarify",
+    why: "Bounded max-5-Q ambiguity-clarification loop faithful to spec-kit's /speckit.clarify — identifies underspecified areas, encodes answers back into the spec",
+  },
 ];
 
 export const skillsRegistryCategory: ComponentCategory = {

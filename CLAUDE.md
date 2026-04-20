@@ -40,9 +40,9 @@ Concrete rules:
 - **CLI binaries** — install via upstream installer script (`https://.../install.sh`) or `@latest` tag. Never pin a specific version.
 - **Claude Code plugins** — always run `claude plugin marketplace update` + `claude plugin update <name>` on every `yka-code-setup` and `yka-code-setup update` invocation. `install` alone is not enough; it's install-once-freeze.
 - **`CORE_PLUGINS` list** — curated hardcoded set (we decide which Anthropic-authored plugins to install). Version freshness is handled by the `marketplace update` + `plugin update` pair on every setup, not by auto-fetching the list. Adding a new plugin is a deliberate curation decision: bump `src/packages.ts` and ship a release.
-- **Ported skills** (`brainstorming`, `verification-before-completion`, `clarify-spec`, and any future imports) — MUST have a `.upstream.json` manifest at `skills/<name>/.upstream.json` with `{url, last_known_sha}` and MUST participate in the sync-check (`scripts/sync-upstream-skills.ts`). If you port text from an upstream SKILL.md, register it.
+- **Third-party skills** — install via `npx skills add <owner/repo> -g -y --skill <name>` registered in `src/components/skills-registry.ts`. Never hand-copy SKILL.md text into `skills/`. `npx skills add` pulls the latest upstream version every setup run. Today: `obra/superpowers@brainstorming`, `obra/superpowers@verification-before-completion`, `dceoy/speckit-agent-skills@speckit-clarify` + the seed bundle.
 - **System prompt** (for the CLI itself) — `yka-code-setup update` pulls the latest binary via `git pull` (git clone) / `npm i -g @latest` (global) / re-npx (npx). Already enforced.
-- **Exceptions** — our own customizations (hooks, `/do`, `/ship-feature`, `/fix-bug`, `configs/starship.toml`, `configs/tmux.conf`) are owned text with no upstream; they don't need sync-check. But anything we copy FROM upstream DOES.
+- **Exceptions** — our own customizations (hooks, `/do`, `/ship-feature`, `/fix-bug`, `configs/starship.toml`, `configs/tmux.conf`) are owned text with no upstream; they don't need upstream tracking. But third-party skills MUST be installed via the registry path above, never hand-copied.
 
 If you add a new dependency to this installer, its PR must answer: *how does this pull latest?* If the answer is "it doesn't, it's pinned", it doesn't land.
 

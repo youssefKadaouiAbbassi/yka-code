@@ -31,10 +31,10 @@ describe("skillsRegistryCategory shape", () => {
 });
 
 describe("skillsRegistry install() dry-run", () => {
-  test("with npx present, emits 4 per-package skipped results with [dry-run] markers", async () => {
+  test("with npx present, emits per-package skipped results with [dry-run] markers", async () => {
     if (Bun.which("npx") === null) return;
     const results = await install(env(), true);
-    expect(results.length).toBe(4);
+    expect(results.length).toBe(7);
     for (const r of results) {
       expect(r.component.startsWith("skills.sh:")).toBe(true);
       expect(r.status).toBe("skipped");

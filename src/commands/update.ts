@@ -108,19 +108,6 @@ async function uninstallStalePlugins(removed: { name: string; marketplace: strin
   }
 }
 
-async function checkUpstreamSkills(): Promise<void> {
-  const repoRoot = join(import.meta.dir, "..", "..");
-  const scriptPath = join(repoRoot, "scripts", "sync-upstream-skills.ts");
-  if (!(await fileExists(scriptPath))) return;
-  log.info("Checking ported skills against upstream …");
-  const r = await $`bun ${scriptPath}`.nothrow();
-  if (r.exitCode === 2) {
-    log.warn("One or more ported skills drifted from upstream. Review .dev/upstream-skill-drift/ and decide whether to port.");
-  } else if (r.exitCode === 3) {
-    log.warn("Upstream skill check could not reach all sources (network / gh auth).");
-  }
-}
-
 async function refreshAllPlugins(kept: { name: string; marketplace: string }[]): Promise<void> {
   if (kept.length === 0) return;
   if (!commandExists("claude")) {
@@ -201,7 +188,6 @@ export default defineCommand({
     printDiff(diff);
     await uninstallStalePlugins(diff.removedPlugins);
     await refreshAllPlugins(next.plugins);
-    await checkUpstreamSkills();
 
     const env = await detectEnvironment();
     log.success(`Update complete → v${next.version} (${next.tier}, ${next.scope}) at ${env.claudeDir}`);
