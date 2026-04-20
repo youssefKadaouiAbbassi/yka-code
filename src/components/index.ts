@@ -7,7 +7,6 @@ import { browserWebCategory, browserWebSpecs } from "./browser-web.js";
 import { memoryContextCategory, memoryContextSpecs } from "./memory-context.js";
 import { securityCategory, securitySpecs } from "./security.js";
 import { githubCategory, githubSpecs } from "./github.js";
-import { workstationCategory, buildWorkstationSpecs } from "./workstation.js";
 import { ccPluginsCategory } from "./cc-plugins.js";
 import { workflowCategory, workflowSpecs } from "./workflow.js";
 import { skillsRegistryCategory } from "./skills-registry.js";
@@ -21,7 +20,6 @@ export const RECOMMENDED_CATEGORIES: ComponentCategory[] = [
   skillsRegistryCategory,
   securityCategory,
   githubCategory,
-  workstationCategory,
 ];
 
 export const OPTIONAL_CATEGORIES: ComponentCategory[] = [
@@ -53,7 +51,6 @@ function specsFor(categoryId: string, skipped: Set<number>): ComponentSpec[] | n
     case "memory-context": return memoryContextSpecs;
     case "security": return securitySpecs;
     case "github": return githubSpecs;
-    case "workstation": return buildWorkstationSpecs(skipped);
     case "workflow": return workflowSpecs;
     default: return null;
   }

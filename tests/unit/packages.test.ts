@@ -1,11 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import {
-  CORE_PLUGINS,
-  DEV_CLI_PACKAGES,
-  LAZYGIT_CURL,
-  SOPS_CURL,
-  GITLEAKS_CURL,
-} from "../../src/packages.js";
+import { CORE_PLUGINS, DEV_CLI_PACKAGES } from "../../src/packages.js";
 
 describe("CORE_PLUGINS", () => {
   test("has 10 Anthropic-maintained plugin names", () => {
@@ -52,46 +46,8 @@ describe("DEV_CLI_PACKAGES", () => {
     }
   });
 
-  test("includes the 2026 baseline CLIs", () => {
-    const names = DEV_CLI_PACKAGES.map((p) => p.name);
-    expect(names).toContain("rg");
-    expect(names).toContain("fd");
-    expect(names).toContain("fzf");
-    expect(names).toContain("bat");
-    expect(names).toContain("uv");
-    expect(names).toContain("bun");
-    expect(names).toContain("lazygit");
-    expect(names).toContain("sops");
-    expect(names).toContain("gitleaks");
-  });
-
-  test("lazygit/sops/gitleaks curl scripts match the named exports", () => {
-    const lazygit = DEV_CLI_PACKAGES.find((p) => p.name === "lazygit");
-    const sops = DEV_CLI_PACKAGES.find((p) => p.name === "sops");
-    const gitleaks = DEV_CLI_PACKAGES.find((p) => p.name === "gitleaks");
-    expect(lazygit?.curl).toBe(LAZYGIT_CURL);
-    expect(sops?.curl).toBe(SOPS_CURL);
-    expect(gitleaks?.curl).toBe(GITLEAKS_CURL);
+  test("contains only the Claude-Code-harness-required CLIs", () => {
+    const names = DEV_CLI_PACKAGES.map((p) => p.name).sort();
+    expect(names).toEqual(["bun", "rg", "uv"]);
   });
 });
-
-describe("curl install scripts", () => {
-  test("LAZYGIT_CURL references the lazygit release asset", () => {
-    expect(LAZYGIT_CURL.length).toBeGreaterThan(0);
-    expect(LAZYGIT_CURL).toContain("jesseduffield/lazygit");
-    expect(LAZYGIT_CURL).toContain("$HOME/.local/bin/lazygit");
-  });
-
-  test("SOPS_CURL references the getsops release asset", () => {
-    expect(SOPS_CURL.length).toBeGreaterThan(0);
-    expect(SOPS_CURL).toContain("getsops/sops");
-    expect(SOPS_CURL).toContain("$HOME/.local/bin/sops");
-  });
-
-  test("GITLEAKS_CURL references the gitleaks release asset", () => {
-    expect(GITLEAKS_CURL.length).toBeGreaterThan(0);
-    expect(GITLEAKS_CURL).toContain("gitleaks/gitleaks");
-    expect(GITLEAKS_CURL).toContain("$HOME/.local/bin/gitleaks");
-  });
-});
-

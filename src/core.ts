@@ -164,11 +164,7 @@ async function installJq(env: DetectedEnvironment, dryRun: boolean): Promise<Ins
 }
 
 async function installTmux(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
-  const component = "tmux";
-  const tmuxConfSource = join(getConfigsDir(), "tmux.conf");
-  const tmuxConfTarget = join(env.homeDir, ".tmux.conf");
-
-  const binResult = await installBinary(
+  return installBinary(
     {
       name: "tmux",
       displayName: "tmux",
@@ -176,119 +172,6 @@ async function installTmux(env: DetectedEnvironment, dryRun: boolean): Promise<I
       apt: "sudo apt-get install -y tmux",
       pacman: "sudo pacman -S --noconfirm tmux",
       dnf: "sudo dnf install -y tmux",
-    },
-    env,
-    dryRun
-  );
-
-  if (dryRun) {
-    log.info(`[dry-run] Would copy ${tmuxConfSource} -> ${tmuxConfTarget}`);
-    return { ...binResult, component };
-  }
-
-  // Deploy config regardless of whether tmux was just installed or already present
-  try {
-    await copyFile(tmuxConfSource, tmuxConfTarget);
-    log.success(`Deployed tmux.conf to ${tmuxConfTarget}`);
-  } catch (error) {
-    return {
-      component,
-      status: "failed",
-      message: `tmux binary ok but failed to deploy config: ${error instanceof Error ? error.message : String(error)}`,
-      verifyPassed: false,
-    };
-  }
-
-  return { ...binResult, component };
-}
-
-async function installStarship(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
-  const component = "starship";
-  const starshipConfSource = join(getConfigsDir(), "starship.toml");
-  const starshipConfTarget = join(env.homeDir, ".config", "starship.toml");
-
-  const pkg =
-    env.packageManager === "brew"
-      ? {
-          name: "starship",
-          displayName: "starship",
-          brew: "brew install starship",
-        }
-      : {
-          name: "starship",
-          displayName: "starship",
-          curl: "curl --connect-timeout 15 --max-time 120 -sS https://starship.rs/install.sh | sh -s -- -y",
-        };
-
-  const binResult = await installBinary(pkg, env, dryRun);
-
-  if (dryRun) {
-    log.info(`[dry-run] Would copy ${starshipConfSource} -> ${starshipConfTarget}`);
-    log.info(`[dry-run] Would append starship init to ${env.shellRcPath}`);
-    return { ...binResult, component };
-  }
-
-  try {
-    await ensureDir(join(env.homeDir, ".config"));
-    await copyFile(starshipConfSource, starshipConfTarget);
-    log.success(`Deployed starship.toml to ${starshipConfTarget}`);
-  } catch (error) {
-    return {
-      component,
-      status: "failed",
-      message: `starship binary ok but failed to deploy config: ${error instanceof Error ? error.message : String(error)}`,
-      verifyPassed: false,
-    };
-  }
-
-  await appendToShellRc(env, [`eval "$(starship init ${env.shell})"`], "starship");
-
-  return { ...binResult, component };
-}
-
-async function installMise(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
-  const component = "mise";
-
-  if (dryRun) {
-    log.info(`[dry-run] Would install mise via curl https://mise.run | sh`);
-    log.info(`[dry-run] Would append mise activate to ${env.shellRcPath}`);
-    return { component, status: "skipped", message: `[dry-run] Would install mise`, verifyPassed: false };
-  }
-
-  const result = await installBinary(
-    {
-      name: "mise",
-      displayName: "mise",
-      curl: "curl --connect-timeout 15 --max-time 120 https://mise.run | sh",
-    },
-    env,
-    dryRun
-  );
-
-  if (result.status === "installed" || result.status === "already-installed") {
-    await appendToShellRc(
-      env,
-      [
-        `export PATH="$HOME/.local/share/mise/shims:$PATH"`,
-        `eval "$(mise activate ${env.shell})"`,
-      ],
-      "mise",
-    );
-  }
-
-  return { ...result, component };
-}
-
-async function installJust(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
-  return installBinary(
-    {
-      name: "just",
-      displayName: "just",
-      brew: "brew install just",
-      apt: "sudo apt-get install -y just",
-      pacman: "sudo pacman -S --noconfirm just",
-      dnf: "sudo dnf install -y just",
-      curl: "curl --connect-timeout 15 --max-time 120 --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin",
     },
     env,
     dryRun
@@ -301,38 +184,6 @@ async function installDevCliBaseline(env: DetectedEnvironment, dryRun: boolean):
     results.push(await installBinary(pkg, env, dryRun));
   }
   return results;
-}
-
-async function addGitAliases(_env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
-  const component = "git-aliases";
-  const aliases: Array<[string, string]> = [
-    ["wt", "worktree"],
-    ["wta", "worktree add"],
-    ["wtl", "worktree list"],
-    ["wtr", "worktree remove"],
-  ];
-
-  if (dryRun) {
-    for (const [alias, value] of aliases) {
-      log.info(`[dry-run] Would run: git config --global alias.${alias} "${value}"`);
-    }
-    return { component, status: "skipped", message: `[dry-run] Would add 4 git worktree aliases`, verifyPassed: false };
-  }
-
-  try {
-    for (const [alias, value] of aliases) {
-      await $`git config --global alias.${alias} ${value}`.quiet();
-    }
-    log.success(`Added git worktree aliases: wt, wta, wtl, wtr`);
-    return { component, status: "installed", message: `Git aliases wt, wta, wtl, wtr configured`, verifyPassed: true };
-  } catch (error) {
-    return {
-      component,
-      status: "failed",
-      message: `Failed to add git aliases: ${error instanceof Error ? error.message : String(error)}`,
-      verifyPassed: false,
-    };
-  }
 }
 
 async function enableTelemetry(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
@@ -356,29 +207,6 @@ async function enableTelemetry(env: DetectedEnvironment, dryRun: boolean): Promi
       component,
       status: "failed",
       message: `Failed to set Claude Code env vars: ${error instanceof Error ? error.message : String(error)}`,
-      verifyPassed: false,
-    };
-  }
-}
-
-async function setCavemanDefaultMode(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
-  const component = "caveman-default-mode";
-  const lines = ["export CAVEMAN_DEFAULT_MODE=full"];
-
-  if (dryRun) {
-    log.info(`[dry-run] Would append CAVEMAN_DEFAULT_MODE=full to ${env.shellRcPath}`);
-    return { component, status: "skipped", message: `[dry-run] Would set caveman default mode`, verifyPassed: false };
-  }
-
-  try {
-    await appendToShellRc(env, lines, "caveman");
-    log.success(`CAVEMAN_DEFAULT_MODE=full added to ${env.shellRcPath}`);
-    return { component, status: "installed", message: `caveman default mode set to 'full'`, verifyPassed: true };
-  } catch (error) {
-    return {
-      component,
-      status: "failed",
-      message: `Failed to set caveman default: ${error instanceof Error ? error.message : String(error)}`,
       verifyPassed: false,
     };
   }
@@ -426,8 +254,6 @@ export async function installCore(
     : [
         join(env.claudeDir, "settings.json"),
         join(env.claudeDir, "CLAUDE.md"),
-        join(env.homeDir, ".tmux.conf"),
-        join(env.homeDir, ".config", "starship.toml"),
         env.shellRcPath,
       ];
 
@@ -444,13 +270,8 @@ export async function installCore(
       }
       results.push(await installJq(env, dryRun));
       results.push(await installTmux(env, dryRun));
-      results.push(await installStarship(env, dryRun));
-      results.push(await installMise(env, dryRun));
-      results.push(await installJust(env, dryRun));
       results.push(...(await installDevCliBaseline(env, dryRun)));
-      results.push(await addGitAliases(env, dryRun));
       results.push(await enableTelemetry(env, dryRun));
-      results.push(await setCavemanDefaultMode(env, dryRun));
     }
     results.push(await createLessons(env, dryRun));
     return results;
