@@ -17,6 +17,7 @@ transcript="$(printf '%s' "$HOOK_INPUT" | jq -r '.transcript_path // empty')"
 
 turn_start="$(jq -s '[to_entries[] | select(
   .value.type == "user" and
+  ((.value.isMeta // false) == false) and
   (.value.message.content | if type == "array" then all(.[]; .type != "tool_result") else true end)
 )] | (last.key // -1) + 1 | if . < 1 then 1 else . end' "$transcript" 2>/dev/null || echo 1)"
 : "${turn_start:=1}"

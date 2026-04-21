@@ -26,6 +26,7 @@ research_tools='mcp__docfork__search_docs|mcp__docfork__fetch_doc|mcp__deepwiki_
 # the last record whose content has no tool_result element.
 turn_start="$(jq -s '[to_entries[] | select(
   .value.type == "user" and
+  ((.value.isMeta // false) == false) and
   (.value.message.content | if type == "array" then all(.[]; .type != "tool_result") else true end)
 )] | (last.key // -1) + 1 | if . < 1 then 1 else . end' "$transcript" 2>/dev/null || echo 1)"
 : "${turn_start:=1}"

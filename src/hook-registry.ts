@@ -28,6 +28,7 @@ export const HOOK_REGISTRATIONS: HookRegistration[] = [
   { file: "pre-destructive-blocker.sh", event: "PreToolUse", matcher: "Bash" },
   { file: "pre-pr-gate.sh",            event: "PreToolUse", matcher: "Bash" },
   { file: "pre-research-check.sh",     event: "PreToolUse", matcher: "WebSearch|WebFetch|mcp__docfork__.*|mcp__deepwiki__.*|mcp__github__.*" },
+  { file: "pre-skills-check.sh",       event: "PreToolUse", matcher: "Bash|Edit|Write|MultiEdit" },
 
   { file: "user-prompt-submit.sh",     event: "UserPromptSubmit" },
   { file: "user-prompt-skill-primer.sh", event: "UserPromptSubmit" },

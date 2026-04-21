@@ -11,7 +11,7 @@ read_hook_stdin
 prompt="$(printf '%s' "$HOOK_INPUT" | jq -r '.prompt // empty' 2>/dev/null)"
 [[ -z "$prompt" ]] && exit 0
 
-if ! printf '%s' "$prompt" | grep -qiE '\b(build|implement|add|ship|fix|refactor|audit|review|write|create|debug|migrate|port|extract|dedupe|simplify|clean.up)\b'; then
+if ! printf '%s' "$prompt" | grep -qiE '\b(build|implement|add|ship|fix|refactor|audit|review|write|create|debug|migrate|port|extract|dedupe|simplify|clean.up|update|change|modify|delete|remove|rename|upgrade|bump|replace|optimize|improve|edit|wire|bug|broken)\b'; then
   exit 0
 fi
 

@@ -43,6 +43,11 @@ const HOOK_PAYLOADS: Record<string, string> = {
     tool_input: {},
     transcript_path: "/tmp/none.jsonl",
   }),
+  "pre-skills-check.sh": JSON.stringify({
+    tool_name: "Read",
+    tool_input: {},
+    transcript_path: "/tmp/none.jsonl",
+  }),
   "session-end.sh": JSON.stringify({ session_id: "s", stop_hook_active: false }),
   "session-start.sh": JSON.stringify({ session_id: "s" }),
   "session-start-team-reaper.sh": JSON.stringify({ session_id: "s" }),
