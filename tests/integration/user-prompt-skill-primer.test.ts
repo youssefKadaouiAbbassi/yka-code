@@ -121,7 +121,7 @@ describe.skipIf(!jqAvailable)("user-prompt-skill-primer.sh", () => {
     expect(text).toContain('Skill(skill: "test-driven-development")');
   });
 
-  test("silent when Skills already invoked earlier in session (session-wide skip)", async () => {
+  test("Block A skipped when Skills loaded session-wide, Block B still emits done-gate", async () => {
     const transcript = writeTranscript([
       realUserTurn("add helper #1"),
       assistantTurn([toolUse("Skill", { skill: "karpathy-guidelines" })]),
@@ -134,7 +134,64 @@ describe.skipIf(!jqAvailable)("user-prompt-skill-primer.sh", () => {
       transcript_path: transcript,
     });
     expect(result.exitCode).toBe(0);
-    expect(parseInjection(result.stdout)).toBeNull();
+    const text = parseInjection(result.stdout);
+    expect(text).not.toBeNull();
+    expect(text).not.toContain("Base pair (load once per session)");
+    expect(text).toContain("Per-turn task-shape reminders");
+    expect(text).toContain("verification-before-completion");
+  });
+
+  test("Block B includes plan-first (multi-file) for cross-module refactor even when base pair loaded", async () => {
+    const transcript = writeTranscript([
+      realUserTurn("earlier task"),
+      assistantTurn([toolUse("Skill", { skill: "karpathy-guidelines" })]),
+      assistantTurn([toolUse("Skill", { skill: "coding-style" })]),
+    ]);
+    const result = await runHook({
+      prompt: "now refactor the logger across modules",
+      session_id: "s",
+      transcript_path: transcript,
+    });
+    expect(result.exitCode).toBe(0);
+    const text = parseInjection(result.stdout);
+    expect(text).not.toBeNull();
+    expect(text).not.toContain("Base pair (load once per session)");
+    expect(text).toContain("Plan first");
+    expect(text).toContain("EnterPlanMode");
+    expect(text).toContain('Skill(skill: "do")');
+    expect(text).toContain('Skill(skill: "verification-before-completion")');
+  });
+
+  test("Block B uses brainstorming nudge when prompt is fuzzy-scope", async () => {
+    const result = await runHook({
+      prompt: "I am thinking about refactoring the auth module, not sure yet",
+      session_id: "s",
+    });
+    expect(result.exitCode).toBe(0);
+    const text = parseInjection(result.stdout);
+    expect(text).not.toBeNull();
+    expect(text).toContain("scope is fuzzy");
+    expect(text).toContain('Skill(skill: "brainstorming")');
+    expect(text).toContain("EnterPlanMode");
+  });
+
+  test("Block B includes TDD even when base pair already loaded", async () => {
+    const transcript = writeTranscript([
+      realUserTurn("earlier task"),
+      assistantTurn([toolUse("Skill", { skill: "karpathy-guidelines" })]),
+      assistantTurn([toolUse("Skill", { skill: "coding-style" })]),
+    ]);
+    const result = await runHook({
+      prompt: "implement a TokenBucket rate limiter class, correctness-critical infrastructure code",
+      session_id: "s",
+      transcript_path: transcript,
+    });
+    expect(result.exitCode).toBe(0);
+    const text = parseInjection(result.stdout);
+    expect(text).not.toBeNull();
+    expect(text).not.toContain("Base pair (load once per session)");
+    expect(text).toContain('Skill(skill: "test-driven-development")');
+    expect(text).toContain('Skill(skill: "verification-before-completion")');
   });
 
   test("emits directive when transcript exists but has no prior Skill invocations", async () => {

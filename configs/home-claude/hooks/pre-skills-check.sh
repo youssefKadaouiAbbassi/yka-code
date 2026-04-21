@@ -42,7 +42,7 @@ user_prompt="$(printf '%s\n' "$turn_json" | head -1 | jq -r '
 ' 2>/dev/null || true)"
 [[ -z "$user_prompt" ]] && exit 0
 
-if ! printf '%s' "$user_prompt" | grep -qiE '\b(build|implement|add|ship|fix|refactor|audit|review|write|create|debug|migrate|port|extract|dedupe|simplify|clean.up|update|change|modify|delete|remove|rename|upgrade|bump|replace|optimize|improve|edit|wire|bug|broken)\b'; then
+if ! printf '%s' "$user_prompt" | grep -qiE '\b(build|implement|add|ship|fix|refactor|audit|review|write|create|debug|migrate|port|extract|dedupe|simplify|clean.up|update|change|modify|delete|remove|rename|upgrade|bump|replace|optimize|improve|edit|wire|bug|broken)'; then
   exit 0
 fi
 
