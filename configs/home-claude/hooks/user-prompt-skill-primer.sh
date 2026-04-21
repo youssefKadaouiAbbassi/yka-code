@@ -11,6 +11,16 @@ read_hook_stdin
 prompt="$(printf '%s' "$HOOK_INPUT" | jq -r '.prompt // empty' 2>/dev/null)"
 [[ -z "$prompt" ]] && exit 0
 
+transcript="$(printf '%s' "$HOOK_INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)"
+if [[ -n "$transcript" && -f "$transcript" ]]; then
+  loaded="$(jq -rs '
+    [.[] | select(.type == "assistant") | .message.content[]? |
+     select(.type == "tool_use" and .name == "Skill") | .input.skill] |
+    any(. == "karpathy-guidelines" or . == "coding-style")
+  ' "$transcript" 2>/dev/null || echo false)"
+  [[ "$loaded" == "true" ]] && exit 0
+fi
+
 if ! printf '%s' "$prompt" | grep -qiE '\b(build|implement|add|ship|fix|refactor|audit|review|write|create|debug|migrate|port|extract|dedupe|simplify|clean.up|update|change|modify|delete|remove|rename|upgrade|bump|replace|optimize|improve|edit|wire|bug|broken)\b'; then
   exit 0
 fi

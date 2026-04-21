@@ -169,6 +169,24 @@ describe.skipIf(!jqAvailable)("pre-skills-check.sh", () => {
     expect(result.exitCode).toBe(0);
   });
 
+  test("allows Bash across turns once Skills were invoked earlier in session", async () => {
+    const transcript = writeTranscript([
+      realUserTurn("add helper #1"),
+      assistantTurn([toolUse("Skill", { skill: "karpathy-guidelines" })]),
+      assistantTurn([toolUse("Skill", { skill: "coding-style" })]),
+      assistantTurn([toolUse("Write", { file_path: "/tmp/x", content: "y" })]),
+      realUserTurn("now also add helper #2"),
+    ]);
+    const result = await runHook({
+      tool_name: "Bash",
+      tool_input: { command: "ls" },
+      transcript_path: transcript,
+      session_id: "s",
+    });
+    expect(result.exitCode).toBe(0);
+    expect(result.stderr).not.toContain(BLOCK_MARKER);
+  });
+
   test("allows Bash when Skill invocation is followed by Skill-output isMeta user records (real transcript shape)", async () => {
     const transcript = writeTranscript([
       realUserTurn("add a helper function to src/utils.ts"),

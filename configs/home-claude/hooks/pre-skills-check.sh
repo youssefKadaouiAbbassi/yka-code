@@ -17,6 +17,13 @@ esac
 transcript="$(printf '%s' "$HOOK_INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)"
 [[ -z "$transcript" || ! -f "$transcript" ]] && exit 0
 
+skill_seen="$(jq -rs '
+  [.[] | select(.type == "assistant") | .message.content[]? |
+   select(.type == "tool_use" and .name == "Skill") | .input.skill] |
+  any(. == "karpathy-guidelines" or . == "coding-style")
+' "$transcript" 2>/dev/null || echo false)"
+[[ "$skill_seen" == "true" ]] && exit 0
+
 turn_start="$(jq -s '[to_entries[] | select(
   .value.type == "user" and
   ((.value.isMeta // false) == false) and
@@ -38,14 +45,6 @@ user_prompt="$(printf '%s\n' "$turn_json" | head -1 | jq -r '
 if ! printf '%s' "$user_prompt" | grep -qiE '\b(build|implement|add|ship|fix|refactor|audit|review|write|create|debug|migrate|port|extract|dedupe|simplify|clean.up|update|change|modify|delete|remove|rename|upgrade|bump|replace|optimize|improve|edit|wire|bug|broken)\b'; then
   exit 0
 fi
-
-skill_seen="$(printf '%s\n' "$turn_json" | jq -rs '
-  [.[] | select(.type == "assistant") | .message.content[]? |
-   select(.type == "tool_use" and .name == "Skill") | .input.skill] |
-  any(. == "karpathy-guidelines" or . == "coding-style")
-' 2>/dev/null || echo false)"
-
-[[ "$skill_seen" == "true" ]] && exit 0
 
 cat >&2 <<'EOF'
 === yka-code PreToolUse block ===
