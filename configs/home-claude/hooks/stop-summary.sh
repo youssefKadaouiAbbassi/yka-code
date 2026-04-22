@@ -78,7 +78,11 @@ fi
 if command -v jq >/dev/null 2>&1; then
   transcript="$(printf '%s' "$HOOK_INPUT" | jq -r '.transcript_path // empty' 2>/dev/null || true)"
   if [[ -n "$transcript" && -f "$transcript" ]]; then
-    turn_start="$(awk '/"role": *"user"/ { start = NR } END { print (start ? start : 1) }' "$transcript" 2>/dev/null || echo 1)"
+    turn_start="$(jq -s '[to_entries[] | select(
+      .value.type == "user" and
+      ((.value.isMeta // false) == false) and
+      (.value.message.content | if type == "array" then all(.[]; .type != "tool_result") else true end)
+    )] | (last.key // -1) + 1 | if . < 1 then 1 else . end' "$transcript" 2>/dev/null || echo 1)"
     turn_json="$(sed -n "${turn_start},\$p" "$transcript" 2>/dev/null || true)"
 
     edit_files="$(printf '%s' "$turn_json" | jq -r '
