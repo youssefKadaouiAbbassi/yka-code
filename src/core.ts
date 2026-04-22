@@ -179,6 +179,37 @@ async function installTmux(env: DetectedEnvironment, dryRun: boolean): Promise<I
   );
 }
 
+async function ensureTmuxFocusEvents(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult> {
+  const component = "tmux-focus-events";
+  const tmuxConf = join(env.homeDir, ".tmux.conf");
+  const MARKER = "# yka-code-managed";
+  const section = "tmux-focus-events";
+  const block = `${MARKER} start:${section}\nset -g focus-events on\n${MARKER} end:${section}\n`;
+
+  if (dryRun) {
+    const exists = await fileExists(tmuxConf);
+    log.info(`[dry-run] Would ensure 'set -g focus-events on' in ${tmuxConf}${exists ? " (file exists, append if missing)" : " (file missing, create)"}`);
+    return { component, status: "skipped", message: "[dry-run]", verifyPassed: false };
+  }
+
+  let content = "";
+  if (await fileExists(tmuxConf)) {
+    content = await Bun.file(tmuxConf).text();
+  }
+
+  if (/^\s*set\s+-g\s+focus-events\s+on\b/m.test(content)) {
+    return { component, status: "skipped", message: "focus-events already set", verifyPassed: true };
+  }
+
+  if (content.includes(`${MARKER} start:${section}`)) {
+    return { component, status: "skipped", message: "managed block already present", verifyPassed: true };
+  }
+
+  const next = content.endsWith("\n") || content === "" ? content + "\n" + block : content + "\n\n" + block;
+  await Bun.write(tmuxConf, next);
+  return { component, status: "installed", message: `Appended 'set -g focus-events on' to ${tmuxConf}`, verifyPassed: true };
+}
+
 async function installDevCliBaseline(env: DetectedEnvironment, dryRun: boolean): Promise<InstallResult[]> {
   const results: InstallResult[] = [];
   for (const pkg of DEV_CLI_PACKAGES) {
@@ -271,6 +302,7 @@ export async function installCore(
       }
       results.push(await installJq(env, dryRun));
       results.push(await installTmux(env, dryRun));
+      results.push(await ensureTmuxFocusEvents(env, dryRun));
       results.push(...(await installDevCliBaseline(env, dryRun)));
       results.push(await enableTelemetry(env, dryRun));
     }

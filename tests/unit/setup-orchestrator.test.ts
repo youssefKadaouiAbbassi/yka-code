@@ -19,6 +19,7 @@ function normalize(stdout: string, homeDir: string, repoRoot: string): string {
     .replace(/OS: \w+ \(\w+\)/, "OS: $OS ($ARCH)")
     .replace(/pkg: \w+/, "pkg: $PKGMGR")
     .replace(/Verification: \d+ passed, \d+ failed, \d+ skipped/, "Verification: <N> passed, <N> failed, <N> skipped")
+    .replace(/\(file (exists, append if missing|missing, create)\)/g, "(file <STATE>)")
     .replace(/\[\d+\.\d+ms\]/g, "[<MS>]")
     .split("\n")
     .filter((line) => !/^Warning: existing install detected/.test(line))

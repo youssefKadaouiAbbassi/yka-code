@@ -8,6 +8,7 @@
 ℹ [dry-run] Would deploy 17 skills from $REPO/skills to $HOME/.claude/skills
 ℹ [dry-run] Would deploy 4 command(s) from $REPO/commands to $HOME/.claude/commands
 ℹ [dry-run] Would deploy 0 agent(s) from $REPO/agents to $HOME/.claude/agents
+ℹ [dry-run] Would ensure 'set -g focus-events on' in $HOME/.tmux.conf (file <STATE>)
 ℹ [dry-run] Would append Claude Code env vars to $HOME/.$SHELLRC
 ℹ [dry-run] Would create $REPO/tasks/lessons.md if it does not exist
 ℹ Core tier complete.
